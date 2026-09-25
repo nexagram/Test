@@ -198,72 +198,9 @@
         .video-wrapper video { width: 100%; max-height: 300px; border-radius: 12px; background: #000; pointer-events: none; }
         .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; pointer-events: none; }
 
-        .video-circle {
-            width: 220px; height: 220px; max-width: 72vw; max-height: 72vw;
-            border-radius: 50% !important; object-fit: cover; aspect-ratio: 1/1;
-            border: 3px solid transparent; cursor: pointer; background: #111;
-            pointer-events: auto !important; display: block; overflow: hidden;
-        }
-        .sent .video-circle { border-color: rgba(255,255,255,0.35); }
+        .video-circle { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; cursor: pointer; background: var(--in); pointer-events: auto !important; }
+        .sent .video-circle { border-color: rgba(0, 0, 0, 0.3); }
         .received .video-circle { border-color: var(--p); }
-        .media-content.circle-wrap {
-            background: none !important; border-radius: 50% !important;
-            overflow: visible; width: 220px; height: 220px; max-width: 72vw; max-height: 72vw;
-            aspect-ratio: 1/1; padding: 0; margin: 0; position: relative;
-        }
-        /* кружок без оранжевого/серого квадратного пузыря */
-        .m-body:has(.video-circle) {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            overflow: visible;
-        }
-        .m-body:has(.video-circle) .msg-time {
-            position: absolute; right: 10px; bottom: 8px; z-index: 3;
-            color: #fff !important; text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-            background: rgba(0,0,0,0.35); padding: 2px 8px; border-radius: 10px;
-        }
-        .m-body:has(.video-circle) .read-receipt { color: rgba(255,255,255,0.85); }
-        .m-body:has(.video-circle) .read-receipt.read { color: #53bdeb; }
-        .circle-speed-btn { position: absolute; bottom: 12px; left: 12px; z-index: 2; }
-
-        .read-receipt { color: rgba(0,0,0,0.4); }
-        .read-receipt.pending { color: rgba(0,0,0,0.35); }
-        .read-receipt.read { color: #53bdeb !important; }
-        .received .read-receipt { display: none; }
-
-        /* Волна записи ГС */
-        .voice-rec-bar {
-            display: none; flex: 1; align-items: center; gap: 10px;
-            min-width: 0; padding: 8px 14px; border-radius: 24px;
-            background: rgba(255, 59, 48, 0.14); border: 1px solid rgba(255, 59, 48, 0.4);
-        }
-        .voice-rec-bar.active { display: flex; }
-        .voice-rec-wave {
-            flex: 1; display: flex; align-items: center; justify-content: center;
-            gap: 2.5px; height: 32px; overflow: hidden;
-        }
-        .voice-rec-wave span {
-            width: 3px; min-height: 4px; border-radius: 2px;
-            background: var(--red); height: 8px;
-            transition: height 0.05s linear;
-            animation: voiceBounce 0.55s ease-in-out infinite alternate;
-        }
-        .voice-rec-wave span:nth-child(odd) { animation-duration: 0.42s; }
-        .voice-rec-wave span:nth-child(3n) { animation-duration: 0.68s; }
-        .voice-rec-wave span:nth-child(4n) { animation-duration: 0.5s; }
-        @keyframes voiceBounce {
-            from { height: 5px; opacity: 0.55; transform: scaleY(0.7); }
-            to { height: 26px; opacity: 1; transform: scaleY(1); }
-        }
-        .voice-rec-time {
-            font-size: 13px; font-weight: 700; color: var(--red);
-            min-width: 44px; text-align: right; font-variant-numeric: tabular-nums;
-        }
-        .input-row.recording-voice .chat-input { display: none; }
-        .input-row.recording-voice #btn-circle { display: none; }
-        .input-row.recording-voice .send-btn { display: none; }
 
         .voice-player { background: rgba(0, 0, 0, 0.15); border-radius: 24px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; min-width: 200px; }
         .sent .voice-player { background: rgba(0, 0, 0, 0.1); }
@@ -1028,6 +965,7 @@
                 </div>
                 <div class="sett-row" onclick="openSoundSettings()"><span class="material-symbols-outlined">volume_up</span> <span data-i18n="sett_sound">Настройки звука</span></div>
                 <div class="sett-row" onclick="requestNotifications()"><span class="material-symbols-outlined">notifications_active</span> <span data-i18n="sett_notif">Включить уведомления</span></div>
+                <div class="sett-row" onclick="openNtfySettings()"><span class="material-symbols-outlined">cloud_upload</span> ntfy-уведомления</div>
                 <div class="sett-row" onclick="openSupportChat()"><span class="material-symbols-outlined">support_agent</span> <span data-i18n="sett_support">Чат с поддержкой</span></div>
                 <div class="sett-row" id="admin-switch-btn" style="display: none;" onclick="switchAccount()"><span class="material-symbols-outlined">swap_horiz</span> Сменить аккаунт (Админ)</div>
                 <div class="sett-row" id="admin-panel-btn" style="display: none; color: #a855f7; font-weight: bold;" onclick="openAdminPanel()"><span class="material-symbols-outlined">admin_panel_settings</span> Управление пользователями</div>
@@ -1107,10 +1045,7 @@
                 <input type="file" id="attach-input" accept="*/*" style="display:none" onchange="handleAttachment(event)">
                 
                 <input type="text" id="m-in" class="chat-input" data-i18n-placeholder="ph_message" placeholder="Сообщение..." onkeypress="if(event.key==='Enter') send()" oninput="handleTyping()">
-                <div class="voice-rec-bar" id="voice-rec-bar" aria-hidden="true">
-                    <div class="voice-rec-wave" id="voice-rec-wave"></div>
-                    <span class="voice-rec-time" id="voice-rec-time">0:00</span>
-                </div>
+                
                 <div class="input-actions">
                     <button class="icon-btn" id="btn-circle" onclick="toggleVideoCircle()"><span class="material-symbols-outlined">videocam</span></button>
                     <button class="icon-btn" id="btn-voice" onclick="toggleVoice()"><span class="material-symbols-outlined">mic</span></button>
@@ -1570,6 +1505,60 @@
             }
         } catch (e) {
             try { new Notification(title, options); } catch (_) {}
+        }
+    }
+
+
+    // ===== ntfy.sh push (без текста сообщения) =====
+    function getNtfyTopic() {
+        try {
+            if (localSettings && localSettings.ntfyTopic) return String(localSettings.ntfyTopic).trim();
+        } catch (_) {}
+        try {
+            return (localStorage.getItem('Nexagram_NtfyTopic') || '').trim();
+        } catch (_) { return ''; }
+    }
+    function setNtfyTopic(topic) {
+        topic = String(topic || '').trim().replace(/^https?:\/\/ntfy\.sh\//i, '').replace(/^\//, '');
+        if (!localSettings) localSettings = {};
+        localSettings.ntfyTopic = topic;
+        try { localStorage.setItem('Nexagram_Settings', JSON.stringify(localSettings)); } catch (_) {}
+        try { localStorage.setItem('Nexagram_NtfyTopic', topic); } catch (_) {}
+    }
+    function openNtfySettings() {
+        const cur = getNtfyTopic();
+        const v = prompt(
+            'Топик ntfy (например my-nexagram-123)\\n\\nУстановите приложение ntfy и подпишитесь на этот топик.\\nОставьте пустым, чтобы отключить.\\n\\nТекущий:',
+            cur || ''
+        );
+        if (v === null) return;
+        setNtfyTopic(v);
+        if (v.trim()) {
+            showToast('ntfy: ' + v.trim());
+            try { sendNtfyPush('Nexagram', 'Уведомления подключены', 'test'); } catch (_) {}
+        } else {
+            showToast('ntfy отключён');
+        }
+    }
+    async function sendNtfyPush(title, body, tag) {
+        const topic = getNtfyTopic();
+        if (!topic) return;
+        // Не светим текст переписки — только заголовок + «от кого»
+        const safeTitle = String(title || 'Новое сообщение').slice(0, 120);
+        const safeBody = String(body || 'Новое сообщение').slice(0, 200);
+        try {
+            await fetch('https://ntfy.sh/' + encodeURIComponent(topic), {
+                method: 'POST',
+                headers: {
+                    'Title': safeTitle,
+                    'Priority': 'default',
+                    'Tags': 'speech_balloon',
+                    'Click': (typeof location !== 'undefined' ? location.origin + location.pathname : ''),
+                },
+                body: safeBody
+            });
+        } catch (e) {
+            console.warn('ntfy push failed', e);
         }
     }
 
@@ -2361,16 +2350,17 @@
                                 playNotifSound();
                             }
 
-                            if ("Notification" in window && Notification.permission === "granted" && !isChatMuted(c.id)) {
+                            if (!isChatMuted(c.id)) {
                                 let senderName = "Nexagram";
                                 const sender = db.users.find(u => u.id === lastMsg.uid);
-                                if (sender) senderName = sender.name;
-                                let body = lastMsg.txt || 'Новое сообщение';
-                                if (lastMsg.type === 'voice' || lastMsg.type === 'audio') body = '🎙️ Голосовое сообщение';
-                                else if (lastMsg.type === 'image') body = '📷 Фото';
-                                else if (lastMsg.type === 'video' || lastMsg.type === 'video_circle') body = '🎥 Видео';
-                                else if (lastMsg.type === 'file') body = '📄 Файл';
-                                showAppNotification(senderName, body, { tag: 'chat-' + c.id });
+                                if (sender) senderName = sender.name || sender.login || 'Nexagram';
+                                // Без текста сообщения — только факт и отправитель
+                                const notifTitle = 'Новое сообщение';
+                                const notifBody = 'от ' + senderName;
+                                if ("Notification" in window && Notification.permission === "granted") {
+                                    showAppNotification(notifTitle, notifBody, { tag: 'chat-' + c.id });
+                                }
+                                try { sendNtfyPush(notifTitle, notifBody, c.id); } catch (e) { console.warn('ntfy', e); }
                             }
                         }
                     }
@@ -2705,10 +2695,7 @@
     }
 
     function verifiedBadgeHtml(obj) {
-        if (!obj) return '';
-        const lg = String(obj.login || obj.username || '').toLowerCase();
-        const always = !!obj.verified || !!obj.isAI || ['support', 'helper', 'ai', 'iskra'].includes(lg);
-        if (!always) return '';
+        if (!obj || !obj.verified) return '';
         return '<span class="verified-badge" title="Подтверждённый аккаунт"><span class="material-symbols-outlined">verified</span></span>';
     }
     function toggleUserVerified(userId) {
@@ -2763,18 +2750,16 @@
     }
 
 async function uploadToCloud(file) {
-        // Без полноэкранного «Отправка...» — статус только галочками у сообщения
+        const loader = document.getElementById('loader'); loader.style.display = 'flex'; loader.style.opacity = '1';
+        const loaderText = document.querySelector('#loader div:nth-child(2)'); if(loaderText) loaderText.textContent = 'Отправка...';
         const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        let resType = 'auto'; const type = getFileType(file); if (type === 'image') resType = 'image'; else if (type === 'video' || type === 'audio') resType = 'video'; else resType = 'raw';
+        let resType = 'auto'; const type = getFileType(file); if (type === 'image') resType = 'image'; else if (type === 'video' || type === 'audio') resType = 'video'; else resType = 'raw'; 
         try {
             const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resType}/upload`, { method: 'POST', body: formData });
             const data = await res.json(); if (data.error) throw new Error(data.error.message);
-            return data.secure_url;
-        } catch (error) {
-            console.error('uploadToCloud', error);
-            showToast('Ошибка загрузки: ' + (error.message || error));
-            return null;
-        }
+            loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none', 300); if(loaderText) loaderText.textContent = 'Синхронизация...';
+            return data.secure_url; 
+        } catch (error) { loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none', 300); if(loaderText) loaderText.textContent = 'Синхронизация...'; alert('Ошибка: ' + error.message); return null; }
     }
 
     function uploadGlobalWallpaper() { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = async e => { if(e.target.files[0]) { const url = await uploadToCloud(e.target.files[0]); if (url) { me.wallpaper = url; const uIdx = db.users.findIndex(u => u.id === me.id); if (uIdx > -1) rtdb.ref(`/dg_app_data/users/${uIdx}/wallpaper`).set(url); showToast('Обои успешно установлены!'); } } }; input.click(); }
@@ -2868,7 +2853,7 @@ async function uploadToCloud(file) {
             let icon = ''; let color = 'var(--mut)';
             if (c.status === 'missed') { icon = isIncoming ? 'call_received' : 'call_made'; color = 'var(--red)'; } else if (c.status === 'declined') { icon = 'call_end'; color = 'var(--red)'; } else { icon = isIncoming ? 'call_received' : 'call_made'; color = isIncoming ? 'var(--p)' : 'var(--online)'; }
             const timeStr = new Date(c.time).toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); const durStr = c.duration ? ` • ${Math.floor(c.duration/60)}:${(c.duration%60).toString().padStart(2,'0')}` : '';
-            return `<div class="list-item" onclick="startChat('${other.id}')"><div class="av-sm">${getAvatarHtml(other.avatarType, other.avatarValue)}</div><div class="list-info"><div class="list-name" style="color:${c.status==='missed'&&isIncoming ? 'var(--red)' : 'var(--txt)'}">${escapeHtml(other.name)}${verifiedBadgeHtml(other)}</div><div class="list-preview" style="color: ${color}"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">${icon}</span> ${c.isVideo ? 'Видеозвонок' : 'Аудиозвонок'} ${durStr}<span style="color:var(--mut); margin-left:6px; font-weight:normal;">${timeStr}</span></div></div><button class="icon-btn" style="color:var(--p)" onclick="event.stopPropagation(); startChat('${other.id}'); setTimeout(()=>initiateCall(${c.isVideo}), 50);"><span class="material-symbols-outlined">call</span></button></div>`;
+            return `<div class="list-item" onclick="startChat('${other.id}')"><div class="av-sm">${getAvatarHtml(other.avatarType, other.avatarValue)}</div><div class="list-info"><div class="list-name" style="color:${c.status==='missed'&&isIncoming ? 'var(--red)' : 'var(--txt)'}">${escapeHtml(other.name)}</div><div class="list-preview" style="color: ${color}"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">${icon}</span> ${c.isVideo ? 'Видеозвонок' : 'Аудиозвонок'} ${durStr}<span style="color:var(--mut); margin-left:6px; font-weight:normal;">${timeStr}</span></div></div><button class="icon-btn" style="color:var(--p)" onclick="event.stopPropagation(); startChat('${other.id}'); setTimeout(()=>initiateCall(${c.isVideo}), 50);"><span class="material-symbols-outlined">call</span></button></div>`;
         }).join('');
     }
 
@@ -3590,15 +3575,12 @@ async function uploadToCloud(file) {
         if (!passwordVal || passwordVal.length < 4) return showToast('Пароль от 4 символов');
         if (passwordVal !== confirmVal) return showToast('Пароли не совпадают!');
         if (!isEmail && (!secretVal || secretVal.length < 3)) return showToast('Секретное слово от 3 символов');
-        const RESERVED_LOGINS = ['support','helper','ai','iskra','nexagram','system','root','null','undefined','demo'];
-        if (!isEmail && RESERVED_LOGINS.includes(loginLower)) return showToast('Этот юзернейм недоступен');
         if (!isEmail && db.users.find(u => u.login === loginLower)) return showToast('Логин занят');
         
         if (isEmail) {
             let customLogin = prompt("Уникальный логин (без @):");
             if (!customLogin || customLogin.trim().length < 3 || customLogin.includes('@')) { return showToast('Некорректный логин.'); }
             customLogin = customLogin.trim().toLowerCase();
-            if (RESERVED_LOGINS.includes(customLogin)) return showToast('Этот юзернейм недоступен');
             if (db.users.find(u => u.login === customLogin)) { return showToast('Этот логин занят.'); }
 
             try {
@@ -4477,7 +4459,9 @@ async function uploadToCloud(file) {
                 name = chat.name || (chat.type === 'channel' ? 'Канал' : 'Группа');
                 avType = chat.avatarType; avVal = chat.avatarValue;
                 // Канал — иконка рупора, у групп без смайлика
-                badge = verifiedBadgeHtml(chat);
+                badge = verifiedBadgeHtml(chat) + (chat.type === 'channel'
+                    ? ' <span class="material-symbols-outlined" style="font-size: 14px;">campaign</span>'
+                    : '');
             }
             const lastMsg = chat.msgs && chat.msgs.length ? chat.msgs[chat.msgs.length - 1] : null;
             let preview = drafts[chat.id] ? `<span style="color:var(--red);">Черновик:</span> ${escapeHtml(drafts[chat.id])}` : 'Нет сообщений';
@@ -4682,19 +4666,9 @@ async function uploadToCloud(file) {
             if (activeChat.type === 'direct' && activeChat.u1 === activeChat.u2) isRead = true;
             else if (activeChat.type === 'direct') isRead = msg.time <= otherReadTime;
             else { isRead = Object.keys(activeChat.lastRead || {}).some(uid => uid !== me.id && activeChat.lastRead[uid] >= msg.time); }
-            const clockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
             const singleCheck = `<svg width="14" height="11" viewBox="0 0 14 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 5.5L5 9L12.5 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
             const doubleCheck = `<svg width="18" height="11" viewBox="0 0 18 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 5.5L4.5 9L12 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 5.5L10 9L17.5 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-            let readHtml = '';
-            if (isSent) {
-                if (msg.pending || msg.status === 'sending') {
-                    readHtml = `<span class="read-receipt pending" title="Отправляется">${clockSvg}</span>`;
-                } else if (isRead) {
-                    readHtml = `<span class="read-receipt read" title="Прочитано">${doubleCheck}</span>`;
-                } else {
-                    readHtml = `<span class="read-receipt" title="Доставлено">${singleCheck}</span>`;
-                }
-            }
+            const readHtml = isSent ? `<span class="read-receipt ${isRead ? 'read' : ''}">${isRead ? doubleCheck : singleCheck}</span>` : '';
             const editedHtml = msg.isEdited ? `<span style="font-size: 10px; opacity: 0.6; margin-left: 4px;">(изм.)</span>` : '';
             const pinBadge = isMsgPinned(msg) ? `<div class="msg-pinned-badge"><span class="material-symbols-outlined" style="font-size:12px;">keep</span> Закреплено</div>` : '';
 
@@ -4702,7 +4676,7 @@ async function uploadToCloud(file) {
             let authorNameHtml = '';
             if (!isSent && (activeChat.type === 'group' || activeChat.type === 'channel')) {
                 const author = db.users.find(u => u.id === msg.uid);
-                authorNameHtml = `<div class="msg-author">${escapeHtml(author ? author.name : 'Unknown')}${author ? verifiedBadgeHtml(author) : ''}</div>`;
+                authorNameHtml = `<div class="msg-author">${escapeHtml(author ? author.name : 'Unknown')}</div>`;
             }
             let replyHtml = '';
             if (msg.reply) replyHtml = `<div class="msg-quote">${escapeHtml(msg.reply.txt || 'Медиа')}</div>`;
@@ -4710,7 +4684,7 @@ async function uploadToCloud(file) {
             if (msg.type === 'voice' || msg.type === 'audio') content = `<div class="voice-msg-placeholder" data-idx="${idx}"></div>`;
             else if (msg.type === 'image') content = `<div class="media-content"><img src="${escapeHtml(msg.url)}" onclick="openMedia(${idx})"></div>`;
             else if (msg.type === 'video') content = `<div class="media-content video-wrapper" onclick="openMedia(${idx})"><video src="${escapeHtml(msg.url)}"></video><div class="play-overlay"><span class="material-symbols-outlined">play_arrow</span></div></div>`;
-            else if (msg.type === 'video_circle') content = `<div class="media-content circle-wrap"><video src="${escapeHtml(msg.url)}" autoplay loop playsinline class="video-circle" onclick="this.muted = !this.muted" muted></video><button class="voice-speed-btn circle-speed-btn" onclick="event.stopPropagation(); const v = this.previousElementSibling; if(v.playbackRate===1){v.playbackRate=1.5;this.textContent='1.5x';}else if(v.playbackRate===1.5){v.playbackRate=2;this.textContent='2x';}else{v.playbackRate=1;this.textContent='1x';}">1x</button></div>`;
+            else if (msg.type === 'video_circle') content = `<div class="media-content" style="background: none; position:relative;"><video src="${escapeHtml(msg.url)}" autoplay loop playsinline class="video-circle" onclick="this.muted = !this.muted" muted></video><button class="voice-speed-btn circle-speed-btn" onclick="event.stopPropagation(); const v = this.previousElementSibling; if(v.playbackRate===1){v.playbackRate=1.5;this.textContent='1.5x';}else if(v.playbackRate===1.5){v.playbackRate=2;this.textContent='2x';}else{v.playbackRate=1;this.textContent='1x';}">1x</button></div>`;
             else if (msg.type === 'file') content = `<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:12px;margin-top:4px;"><span class="material-symbols-outlined">description</span><a href="${escapeHtml(msg.url)}" target="_blank" style="color:inherit;text-decoration:none;font-weight:600;font-size:15px;word-break:break-all;">Скачать файл</a></div>`;
             else content = `<div>${escapeHtml(msg.txt || '')}</div>`;
             
@@ -4849,112 +4823,19 @@ async function uploadToCloud(file) {
             const ou = db.users.find(u => u && u.id === oid);
             if (isAIUser(ou) || isAIUser(oid)) return showToast('Искре можно отправлять только текст');
         } const file = e.target.files[0]; if (!file) return; e.target.value = '';
-        const type = getFileType(file);
-        const chatIndex = ensureChatInDb();
-        if (chatIndex < 0) return;
-        const localUrl = (type === 'image' || type === 'video' || type === 'audio') ? URL.createObjectURL(file) : '';
-        const msgObj = { uid: me.id, type: type, url: localUrl || '', time: Date.now(), reactions: {}, pending: true, status: 'sending', fileName: file.name };
-        if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); }
-        if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = [];
-        db.chats[chatIndex].msgs.push(msgObj);
-        const localIdx = db.chats[chatIndex].msgs.length - 1;
-        if (activeChat.id === db.chats[chatIndex].id) renderMsgs();
-        const url = await uploadToCloud(file);
-        try { if (localUrl) URL.revokeObjectURL(localUrl); } catch(_){}
-        if (url && db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
-            db.chats[chatIndex].msgs[localIdx].url = url;
-            delete db.chats[chatIndex].msgs[localIdx].pending;
-            delete db.chats[chatIndex].msgs[localIdx].status;
-            rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs);
-            if (activeChat && activeChat.id === db.chats[chatIndex].id) renderMsgs();
-            if (typeof updateLastSeen === 'function') updateLastSeen();
-        } else if (db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
-            db.chats[chatIndex].msgs.splice(localIdx, 1);
-            if (activeChat && activeChat.id === db.chats[chatIndex].id) renderMsgs();
-        }
-    }
-
-
-    let voiceRecTimer = null, voiceRecStartedAt = 0, voiceRecAnimRaf = null, voiceRecAnalyser = null, voiceRecSource = null;
-    function buildVoiceRecWaveBars() {
-        const wave = document.getElementById('voice-rec-wave');
-        if (!wave) return;
-        if (!wave.childElementCount) {
-            for (let i = 0; i < 22; i++) {
-                const s = document.createElement('span');
-                s.style.animationDelay = (i * 0.04) + 's';
-                wave.appendChild(s);
+        const type = getFileType(file); const url = await uploadToCloud(file);
+        if (url) {
+            const chatIndex = ensureChatInDb();
+            if (chatIndex > -1) {
+                const msgObj = { uid: me.id, type: type, url: url, time: Date.now(), reactions: {} };
+                if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); }
+                if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = [];
+                db.chats[chatIndex].msgs.push(msgObj);
+                rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs);
+                if (activeChat.id === db.chats[chatIndex].id) renderMsgs();
+                if (typeof updateLastSeen === 'function') updateLastSeen();
             }
         }
-    }
-    function setVoiceRecUI(on) {
-        const row = document.querySelector('#chat-input-area .input-row');
-        const bar = document.getElementById('voice-rec-bar');
-        const btn = document.getElementById('btn-voice');
-        if (row) row.classList.toggle('recording-voice', !!on);
-        if (bar) { bar.classList.toggle('active', !!on); bar.setAttribute('aria-hidden', on ? 'false' : 'true'); }
-        if (btn) {
-            btn.classList.toggle('recording-pulse', !!on);
-            btn.innerHTML = on ? '<span class="material-symbols-outlined">stop</span>' : '<span class="material-symbols-outlined">mic</span>';
-        }
-        if (on) {
-            buildVoiceRecWaveBars();
-            voiceRecStartedAt = Date.now();
-            const timeEl = document.getElementById('voice-rec-time');
-            if (voiceRecTimer) clearInterval(voiceRecTimer);
-            voiceRecTimer = setInterval(() => {
-                const sec = Math.floor((Date.now() - voiceRecStartedAt) / 1000);
-                if (timeEl) timeEl.textContent = Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0');
-            }, 200);
-        } else {
-            if (voiceRecTimer) { clearInterval(voiceRecTimer); voiceRecTimer = null; }
-            const timeEl = document.getElementById('voice-rec-time');
-            if (timeEl) timeEl.textContent = '0:00';
-            stopInputVoiceWave();
-        }
-    }
-    function startInputVoiceWave(stream) {
-        stopInputVoiceWave();
-        try {
-            const AC = window.AudioContext || window.webkitAudioContext;
-            if (!AC) return;
-            if (!audioCtx) audioCtx = new AC();
-            if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
-            voiceRecAnalyser = audioCtx.createAnalyser();
-            voiceRecAnalyser.fftSize = 256;
-            voiceRecAnalyser.smoothingTimeConstant = 0.35;
-            voiceRecSource = audioCtx.createMediaStreamSource(stream);
-            voiceRecSource.connect(voiceRecAnalyser);
-            const data = new Uint8Array(voiceRecAnalyser.frequencyBinCount);
-            const wave = document.getElementById('voice-rec-wave');
-            const tick = () => {
-                voiceRecAnimRaf = requestAnimationFrame(tick);
-                if (!voiceRecAnalyser || !wave) return;
-                voiceRecAnalyser.getByteFrequencyData(data);
-                const bars = wave.querySelectorAll('span');
-                const step = Math.max(1, Math.floor(data.length / Math.max(1, bars.length)));
-                bars.forEach((bar, i) => {
-                    // усиливаем живость
-                    const v = data[Math.min(data.length - 1, i * step)] || 0;
-                    const boost = Math.pow(v / 255, 0.7);
-                    const h = 4 + boost * 28 + (Math.random() * 3);
-                    bar.style.height = h + 'px';
-                    bar.style.animation = 'none';
-                    bar.style.opacity = String(0.55 + boost * 0.45);
-                });
-            };
-            tick();
-        } catch (e) { console.warn(e); }
-    }
-    function stopInputVoiceWave() {
-        if (voiceRecAnimRaf) { cancelAnimationFrame(voiceRecAnimRaf); voiceRecAnimRaf = null; }
-        try { if (voiceRecSource) voiceRecSource.disconnect(); } catch(_){}
-        voiceRecSource = null; voiceRecAnalyser = null;
-        const wave = document.getElementById('voice-rec-wave');
-        if (wave) wave.querySelectorAll('span').forEach((bar, i) => {
-            bar.style.height = ''; bar.style.opacity = ''; bar.style.animation = '';
-            bar.style.animationDelay = (i * 0.04) + 's';
-        });
     }
 
     function toggleVoice() {
@@ -4964,41 +4845,14 @@ async function uploadToCloud(file) {
             const ou = db.users.find(u => u && u.id === oid);
             if (isAIUser(ou) || isAIUser(oid)) return showToast('Искре можно отправлять только текст');
         } const btn = document.getElementById('btn-voice');
-        if (isRecordingVoice) { mediaRecorder.stop(); isRecordingVoice = false; setVoiceRecUI(false); } 
+        if (isRecordingVoice) { mediaRecorder.stop(); isRecordingVoice = false; btn.classList.remove('recording-pulse'); } 
         else {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                    isRecordingVoice = true; setVoiceRecUI(true); startInputVoiceWave(stream);
+                    isRecordingVoice = true; btn.classList.add('recording-pulse');
                     let options = undefined; if (MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/webm' }; else if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
                     mediaRecorder = new MediaRecorder(stream, options); recordedChunks = []; mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
-                    mediaRecorder.onstop = async () => {
-                        try { if (typeof setVoiceRecUI === 'function') setVoiceRecUI(false); } catch(_){}
-                        const finalMime = mediaRecorder.mimeType || 'audio/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm';
-                        const blob = new Blob(recordedChunks, { type: finalMime });
-                        const file = new File([blob], 'voice.' + ext, { type: finalMime });
-                        const chatIndex = ensureChatInDb();
-                        if (chatIndex < 0) { stream.getTracks().forEach(t => t.stop()); return; }
-                        const localUrl = URL.createObjectURL(blob);
-                        const msgObj = { uid: me.id, type: 'voice', url: localUrl, time: Date.now(), reactions: {}, pending: true, status: 'sending' };
-                        if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); }
-                        if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = [];
-                        db.chats[chatIndex].msgs.push(msgObj);
-                        const localIdx = db.chats[chatIndex].msgs.length - 1;
-                        if (activeChat.id === db.chats[chatIndex].id) renderMsgs();
-                        const url = await uploadToCloud(file);
-                        try { URL.revokeObjectURL(localUrl); } catch(_){}
-                        if (url && db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
-                            db.chats[chatIndex].msgs[localIdx].url = url;
-                            delete db.chats[chatIndex].msgs[localIdx].pending;
-                            delete db.chats[chatIndex].msgs[localIdx].status;
-                            rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs);
-                            if (activeChat && activeChat.id === db.chats[chatIndex].id) renderMsgs();
-                        } else if (db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
-                            db.chats[chatIndex].msgs.splice(localIdx, 1);
-                            if (activeChat && activeChat.id === db.chats[chatIndex].id) renderMsgs();
-                        }
-                        stream.getTracks().forEach(t => t.stop());
-                    }; mediaRecorder.start();
+                    mediaRecorder.onstop = async () => { const finalMime = mediaRecorder.mimeType || 'audio/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm'; const blob = new Blob(recordedChunks, { type: finalMime }); const file = new File([blob], 'voice.' + ext, { type: finalMime }); const url = await uploadToCloud(file); if (url) { const chatIndex = ensureChatInDb(); if (chatIndex > -1) { const msgObj = { uid: me.id, type: 'voice', url: url, time: Date.now(), reactions: {} }; if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); } if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = []; db.chats[chatIndex].msgs.push(msgObj); rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs); if (activeChat.id === db.chats[chatIndex].id) renderMsgs(); } } stream.getTracks().forEach(t => t.stop()); }; mediaRecorder.start();
                 }).catch(() => showToast("Нет доступа к микрофону"));
             } else { showToast("Браузер не поддерживает запись голоса"); }
         }
@@ -5018,34 +4872,7 @@ async function uploadToCloud(file) {
                     isRecordingVideo = true; btn.classList.add('recording-pulse'); previewVideo.srcObject = stream; previewContainer.style.display = 'block';
                     let options = undefined; if (MediaRecorder.isTypeSupported('video/webm')) options = { mimeType: 'video/webm' }; else if (MediaRecorder.isTypeSupported('video/mp4')) options = { mimeType: 'video/mp4' };
                     mediaRecorder = new MediaRecorder(stream, options); recordedChunks = []; mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
-                    mediaRecorder.onstop = async () => {
-                        previewContainer.style.display = 'none'; previewVideo.srcObject = null;
-                        const finalMime = mediaRecorder.mimeType || 'video/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm';
-                        const blob = new Blob(recordedChunks, { type: finalMime });
-                        const file = new File([blob], 'video_circle.' + ext, { type: finalMime });
-                        const chatIndex = ensureChatInDb();
-                        if (chatIndex < 0) { stream.getTracks().forEach(t => t.stop()); return; }
-                        const localUrl = URL.createObjectURL(blob);
-                        const msgObj = { uid: me.id, type: 'video_circle', url: localUrl, time: Date.now(), reactions: {}, pending: true, status: 'sending' };
-                        if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); }
-                        if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = [];
-                        db.chats[chatIndex].msgs.push(msgObj);
-                        const localIdx = db.chats[chatIndex].msgs.length - 1;
-                        renderMsgs();
-                        const url = await uploadToCloud(file);
-                        try { URL.revokeObjectURL(localUrl); } catch(_){}
-                        if (url && db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
-                            db.chats[chatIndex].msgs[localIdx].url = url;
-                            delete db.chats[chatIndex].msgs[localIdx].pending;
-                            delete db.chats[chatIndex].msgs[localIdx].status;
-                            rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs);
-                            renderMsgs();
-                        } else if (db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
-                            db.chats[chatIndex].msgs.splice(localIdx, 1);
-                            renderMsgs();
-                        }
-                        stream.getTracks().forEach(t => t.stop());
-                    }; mediaRecorder.start();
+                    mediaRecorder.onstop = async () => { previewContainer.style.display = 'none'; previewVideo.srcObject = null; const finalMime = mediaRecorder.mimeType || 'video/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm'; const blob = new Blob(recordedChunks, { type: finalMime }); const file = new File([blob], 'video_circle.' + ext, { type: finalMime }); const url = await uploadToCloud(file); if(url) { const chatIndex = ensureChatInDb(); if (chatIndex > -1) { const msgObj = { uid: me.id, type: 'video_circle', url: url, time: Date.now(), reactions: {} }; if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); } if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = []; db.chats[chatIndex].msgs.push(msgObj); rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs); renderMsgs(); } } stream.getTracks().forEach(t => t.stop()); }; mediaRecorder.start();
                 }).catch((e) => showToast("Нет доступа к камере: " + e.message));
             } else { showToast("Браузер не поддерживает запись видео"); }
         }
@@ -5526,7 +5353,7 @@ async function uploadToCloud(file) {
             const otherId = activeChat.u1 === me.id ? activeChat.u2 : activeChat.u1; 
             const contact = db.users.find(u => u.id === otherId);
             const isFriend = me.friends.includes(contact.id);
-            const starHtml = ''; // ★ убраны, корона только в админ-панели
+            const starHtml = isSuperAdmin(contact) ? ' <span style="color: #007aff; font-size: 18px;">★</span>' : '';
             const vBadge = verifiedBadgeHtml(contact);
             const isContactAI = isAIUser(contact);
             
@@ -5554,7 +5381,7 @@ async function uploadToCloud(file) {
                 <div class="mp-av-wrap" onclick="openAvatarModalView('${contact.avatarType}', '${contact.avatarValue}')" style="cursor: pointer;">
                     ${getAvatarHtml(contact.avatarType, contact.avatarValue)}
                 </div>
-                <div class="mp-name">${escapeHtml(contact.name)}${vBadge}</div>
+                <div class="mp-name">${escapeHtml(contact.name)}${vBadge}${starHtml}</div>
                 <div class="mp-status">${getUserStatus(contact)}</div>
                 
                 <div class="mp-actions">
@@ -5716,7 +5543,7 @@ async function uploadToCloud(file) {
     }
     function toggleLightMode() { localSettings.lightMode = !localSettings.lightMode; localStorage.setItem('Nexagram_Settings', JSON.stringify(localSettings)); if (localSettings.lightMode) { document.documentElement.setAttribute('data-theme', 'light'); document.getElementById('themeIcon').textContent = 'dark_mode'; } else { document.documentElement.removeAttribute('data-theme'); document.getElementById('themeIcon').textContent = 'light_mode'; } }
     
-    function updUI() { if (!me) return; document.getElementById('p-name').innerHTML = escapeHtml(me.name) + verifiedBadgeHtml(me); document.getElementById('p-log').textContent = '@' + me.login; document.getElementById('p-bio').textContent = me.bio ? me.bio : 'Расскажите о себе...'; renderAvatar(document.getElementById('p-av'), me.avatarType, me.avatarValue); if (isSuperAdmin(me)) { document.getElementById('admin-switch-btn').style.display = 'flex'; document.getElementById('admin-panel-btn').style.display = 'flex'; } else { document.getElementById('admin-switch-btn').style.display = 'none'; document.getElementById('admin-panel-btn').style.display = 'none'; } }
+    function updUI() { if (!me) return; document.getElementById('p-name').textContent = me.name; document.getElementById('p-log').textContent = '@' + me.login; document.getElementById('p-bio').textContent = me.bio ? me.bio : 'Расскажите о себе...'; renderAvatar(document.getElementById('p-av'), me.avatarType, me.avatarValue); if (isSuperAdmin(me)) { document.getElementById('admin-switch-btn').style.display = 'flex'; document.getElementById('admin-panel-btn').style.display = 'flex'; } else { document.getElementById('admin-switch-btn').style.display = 'none'; document.getElementById('admin-panel-btn').style.display = 'none'; } }
     function setTab(tab) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(tab + '-screen').classList.add('active'); document.getElementById('nb-' + tab).classList.add('active'); if (tab === 'friends') renderFriends(); if (tab === 'chats') renderChats(); if (tab === 'calls') renderCalls(); }
     
     window.addSpecificContact = function(userId) { if (!me) return; const friend = db.users.find(u => u.id === userId); if (!friend) return showToast("Пользователь не найден"); if (me.friends.includes(userId)) return showToast("Уже в списке контактов"); if (friend.friendRequests && friend.friendRequests.includes(me.id)) return showToast("Заявка уже отправлена!"); if (me.friendRequests && me.friendRequests.includes(userId)) return acceptReq(userId); if (!friend.friendRequests) friend.friendRequests = []; friend.friendRequests.push(me.id); const uIdx = db.users.findIndex(u => u.id === userId); if(uIdx > -1) rtdb.ref(`/dg_app_data/users/${uIdx}/friendRequests`).set(friend.friendRequests); showToast("Заявка отправлена!"); closeModernProfile(); }
@@ -5731,14 +5558,14 @@ async function uploadToCloud(file) {
         if (me.friendRequests && me.friendRequests.length > 0) {
             reqContainer.innerHTML = '<div class="section-header" style="color:var(--p);">Заявки в друзья</div>' + me.friendRequests.map(id => {
                 const u = db.users.find(x => x.id === id); if(!u) return '';
-                return `<div class="list-item" style="cursor:default;"><div class="av-sm" onclick="startChat('${u.id}')" style="cursor:pointer;">${getAvatarHtml(u.avatarType, u.avatarValue)}</div><div class="list-info" onclick="startChat('${u.id}')" style="cursor:pointer;"><div class="list-name">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}</div><div class="list-preview">Хочет добавить вас</div></div><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px;" onclick="acceptReq('${u.id}')">Принять</button><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px; background:var(--red); margin-left:6px;" onclick="rejectReq('${u.id}')"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button></div>`;
+                return `<div class="list-item" style="cursor:default;"><div class="av-sm" onclick="startChat('${u.id}')" style="cursor:pointer;">${getAvatarHtml(u.avatarType, u.avatarValue)}</div><div class="list-info" onclick="startChat('${u.id}')" style="cursor:pointer;"><div class="list-name">${escapeHtml(u.name)}</div><div class="list-preview">Хочет добавить вас</div></div><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px;" onclick="acceptReq('${u.id}')">Принять</button><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px; background:var(--red); margin-left:6px;" onclick="rejectReq('${u.id}')"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button></div>`;
             }).join('');
         } else { reqContainer.innerHTML = ''; }
 
         const filter = document.getElementById('search-friends')?.value || ''; const container = document.getElementById('f-list'); 
         const friendUsers = me.friends.map(id => db.users.find(u => u && u.id === id)).filter(u => u && u.name.toLowerCase().includes(filter.toLowerCase())); 
         if (friendUsers.length === 0) { container.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined" style="font-size: 48px;">group</span>Список контактов пуст</div>'; return; } 
-        container.innerHTML = friendUsers.map(u => ` <div class="list-item" onclick="startChat('${u.id}')"> <div class="av-sm">${getAvatarHtml(u.avatarType, u.avatarValue)}</div> <div class="list-info"> <div class="list-name">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}</div> <div class="list-preview">${getUserStatus(u)}</div> </div> </div> `).join(''); 
+        container.innerHTML = friendUsers.map(u => ` <div class="list-item" onclick="startChat('${u.id}')"> <div class="av-sm">${getAvatarHtml(u.avatarType, u.avatarValue)}</div> <div class="list-info"> <div class="list-name">${escapeHtml(u.name)}</div> <div class="list-preview">${getUserStatus(u)}</div> </div> </div> `).join(''); 
     }
 
     async function linkEmail() {
