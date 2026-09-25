@@ -2639,7 +2639,10 @@
     }
 
     function verifiedBadgeHtml(obj) {
-        if (!obj || !obj.verified) return '';
+        if (!obj) return '';
+        const lg = String(obj.login || obj.username || '').toLowerCase();
+        const always = !!obj.verified || !!obj.isAI || ['support', 'helper', 'ai', 'iskra'].includes(lg);
+        if (!always) return '';
         return '<span class="verified-badge" title="Подтверждённый аккаунт"><span class="material-symbols-outlined">verified</span></span>';
     }
     function toggleUserVerified(userId) {
@@ -2797,7 +2800,7 @@ async function uploadToCloud(file) {
             let icon = ''; let color = 'var(--mut)';
             if (c.status === 'missed') { icon = isIncoming ? 'call_received' : 'call_made'; color = 'var(--red)'; } else if (c.status === 'declined') { icon = 'call_end'; color = 'var(--red)'; } else { icon = isIncoming ? 'call_received' : 'call_made'; color = isIncoming ? 'var(--p)' : 'var(--online)'; }
             const timeStr = new Date(c.time).toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); const durStr = c.duration ? ` • ${Math.floor(c.duration/60)}:${(c.duration%60).toString().padStart(2,'0')}` : '';
-            return `<div class="list-item" onclick="startChat('${other.id}')"><div class="av-sm">${getAvatarHtml(other.avatarType, other.avatarValue)}</div><div class="list-info"><div class="list-name" style="color:${c.status==='missed'&&isIncoming ? 'var(--red)' : 'var(--txt)'}">${escapeHtml(other.name)}</div><div class="list-preview" style="color: ${color}"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">${icon}</span> ${c.isVideo ? 'Видеозвонок' : 'Аудиозвонок'} ${durStr}<span style="color:var(--mut); margin-left:6px; font-weight:normal;">${timeStr}</span></div></div><button class="icon-btn" style="color:var(--p)" onclick="event.stopPropagation(); startChat('${other.id}'); setTimeout(()=>initiateCall(${c.isVideo}), 50);"><span class="material-symbols-outlined">call</span></button></div>`;
+            return `<div class="list-item" onclick="startChat('${other.id}')"><div class="av-sm">${getAvatarHtml(other.avatarType, other.avatarValue)}</div><div class="list-info"><div class="list-name" style="color:${c.status==='missed'&&isIncoming ? 'var(--red)' : 'var(--txt)'}">${escapeHtml(other.name)}${verifiedBadgeHtml(other)}</div><div class="list-preview" style="color: ${color}"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">${icon}</span> ${c.isVideo ? 'Видеозвонок' : 'Аудиозвонок'} ${durStr}<span style="color:var(--mut); margin-left:6px; font-weight:normal;">${timeStr}</span></div></div><button class="icon-btn" style="color:var(--p)" onclick="event.stopPropagation(); startChat('${other.id}'); setTimeout(()=>initiateCall(${c.isVideo}), 50);"><span class="material-symbols-outlined">call</span></button></div>`;
         }).join('');
     }
 
@@ -3982,7 +3985,7 @@ async function uploadToCloud(file) {
         const story = userStories[currentStoryIdx]; const user = db.users.find(u => u.id === currentStoryUser); if (!user) { closeStory(); return; }
         
         document.getElementById('storyViewerAv').innerHTML = getAvatarHtml(user.avatarType, user.avatarValue);
-        document.getElementById('storyViewerName').innerHTML = `${escapeHtml(user.name)} <span style="opacity:0.6; font-weight:400; margin-left:4px;">${currentStoryIdx + 1}/${userStories.length}</span>`;
+        document.getElementById('storyViewerName').innerHTML = `${escapeHtml(user.name)}${verifiedBadgeHtml(user)} <span style="opacity:0.6; font-weight:400; margin-left:4px;">${currentStoryIdx + 1}/${userStories.length}</span>`;
         const h = Math.floor((now - story.time) / (1000 * 60 * 60)); document.getElementById('storyViewerTime').textContent = h > 0 ? `${h} ч назад` : 'Только что';
         document.getElementById('storyDelBtn').style.display = (currentStoryUser === me.id) ? 'block' : 'none';
 
@@ -4623,7 +4626,7 @@ async function uploadToCloud(file) {
             let authorNameHtml = '';
             if (!isSent && (activeChat.type === 'group' || activeChat.type === 'channel')) {
                 const author = db.users.find(u => u.id === msg.uid);
-                authorNameHtml = `<div class="msg-author">${escapeHtml(author ? author.name : 'Unknown')}</div>`;
+                authorNameHtml = `<div class="msg-author">${escapeHtml(author ? author.name : 'Unknown')}${author ? verifiedBadgeHtml(author) : ''}</div>`;
             }
             let replyHtml = '';
             if (msg.reply) replyHtml = `<div class="msg-quote">${escapeHtml(msg.reply.txt || 'Медиа')}</div>`;
@@ -4866,7 +4869,7 @@ async function uploadToCloud(file) {
                 <div class="account-item" onclick="forceLogin('${u.id}')">
                     <div class="account-avatar">${getAvatarHtml(u.avatarType, u.avatarValue)}</div>
                     <div class="account-info">
-                        <div class="account-name">${escapeHtml(u.name || u.login)}</div>
+                        <div class="account-name">${escapeHtml(u.name || u.login)}${verifiedBadgeHtml(u)}</div>
                         <div class="account-login">@${escapeHtml(u.login)}</div>
                     </div>
                 </div>`).join('');
@@ -4891,7 +4894,7 @@ async function uploadToCloud(file) {
                     <div onclick="forceLogin('${a.id}')" style="display:flex;align-items:center;gap:14px;flex:1;">
                         <div class="account-avatar">${getAvatarHtml(avType, avVal)}</div>
                         <div class="account-info">
-                            <div class="account-name">${escapeHtml(name)}</div>
+                            <div class="account-name">${escapeHtml(name)}${verifiedBadgeHtml(live || { login: login })}</div>
                             <div class="account-login">@${escapeHtml(login)}</div>
                         </div>
                     </div>
@@ -4958,7 +4961,7 @@ async function uploadToCloud(file) {
                 <div style="display: flex; align-items: center; gap: 14px;">
                     <div class="account-avatar">${getAvatarHtml(u.avatarType, u.avatarValue)}</div>
                     <div class="account-info">
-                        <div class="account-name" style="${u.isBanned ? 'text-decoration: line-through; color: var(--mut);' : ''}">${escapeHtml(u.name)}${verifiedBadgeHtml(u)} ${isSuperAdmin(u) ? '👑' : ''}${isSelf ? ' (вы)' : ''}</div>
+                        <div class="account-name" style="${u.isBanned ? 'text-decoration: line-through; color: var(--mut);' : ''}">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}${isSelf ? ' (вы)' : ''}</div>
                         <div class="account-login">@${escapeHtml(u.login)}</div>
                     </div>
                 </div>
@@ -5300,7 +5303,7 @@ async function uploadToCloud(file) {
             const otherId = activeChat.u1 === me.id ? activeChat.u2 : activeChat.u1; 
             const contact = db.users.find(u => u.id === otherId);
             const isFriend = me.friends.includes(contact.id);
-            const starHtml = isSuperAdmin(contact) ? ' <span style="color: #007aff; font-size: 18px;">★</span>' : '';
+            const starHtml = ''; // звёздочки админов убраны
             const vBadge = verifiedBadgeHtml(contact);
             const isContactAI = isAIUser(contact);
             
@@ -5328,7 +5331,7 @@ async function uploadToCloud(file) {
                 <div class="mp-av-wrap" onclick="openAvatarModalView('${contact.avatarType}', '${contact.avatarValue}')" style="cursor: pointer;">
                     ${getAvatarHtml(contact.avatarType, contact.avatarValue)}
                 </div>
-                <div class="mp-name">${escapeHtml(contact.name)}${vBadge}${starHtml}</div>
+                <div class="mp-name">${escapeHtml(contact.name)}${vBadge}</div>
                 <div class="mp-status">${getUserStatus(contact)}</div>
                 
                 <div class="mp-actions">
@@ -5394,7 +5397,7 @@ async function uploadToCloud(file) {
                     membersHtml += `<div class="mp-info-row" style="padding: 12px 16px; border-radius: ${radius};">
                         <div style="display:flex; align-items:center; gap: 12px;">
                             <div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:var(--in); display:flex; align-items:center; justify-content:center; font-size:18px;">${getAvatarHtml(mUser.avatarType, mUser.avatarValue)}</div>
-                            <div class="mp-info-text"><div class="mp-info-title" style="font-size:15px;">${escapeHtml(mUser.name)} ${isMemCreator ? '⭐️' : (isMemAdmin ? '👑' : '')}</div></div>
+                            <div class="mp-info-text"><div class="mp-info-title" style="font-size:15px;">${escapeHtml(mUser.name)}${verifiedBadgeHtml(mUser)}${isMemCreator ? ' · создатель' : (isMemAdmin ? ' · админ' : '')}</div></div>
                         </div>
                         <div>${actionBtn}</div>
                     </div>`; 
@@ -5490,7 +5493,7 @@ async function uploadToCloud(file) {
     }
     function toggleLightMode() { localSettings.lightMode = !localSettings.lightMode; localStorage.setItem('Nexagram_Settings', JSON.stringify(localSettings)); if (localSettings.lightMode) { document.documentElement.setAttribute('data-theme', 'light'); document.getElementById('themeIcon').textContent = 'dark_mode'; } else { document.documentElement.removeAttribute('data-theme'); document.getElementById('themeIcon').textContent = 'light_mode'; } }
     
-    function updUI() { if (!me) return; document.getElementById('p-name').textContent = me.name; document.getElementById('p-log').textContent = '@' + me.login; document.getElementById('p-bio').textContent = me.bio ? me.bio : 'Расскажите о себе...'; renderAvatar(document.getElementById('p-av'), me.avatarType, me.avatarValue); if (isSuperAdmin(me)) { document.getElementById('admin-switch-btn').style.display = 'flex'; document.getElementById('admin-panel-btn').style.display = 'flex'; } else { document.getElementById('admin-switch-btn').style.display = 'none'; document.getElementById('admin-panel-btn').style.display = 'none'; } }
+    function updUI() { if (!me) return; document.getElementById('p-name').innerHTML = escapeHtml(me.name) + verifiedBadgeHtml(me); document.getElementById('p-log').textContent = '@' + me.login; document.getElementById('p-bio').textContent = me.bio ? me.bio : 'Расскажите о себе...'; renderAvatar(document.getElementById('p-av'), me.avatarType, me.avatarValue); if (isSuperAdmin(me)) { document.getElementById('admin-switch-btn').style.display = 'flex'; document.getElementById('admin-panel-btn').style.display = 'flex'; } else { document.getElementById('admin-switch-btn').style.display = 'none'; document.getElementById('admin-panel-btn').style.display = 'none'; } }
     function setTab(tab) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(tab + '-screen').classList.add('active'); document.getElementById('nb-' + tab).classList.add('active'); if (tab === 'friends') renderFriends(); if (tab === 'chats') renderChats(); if (tab === 'calls') renderCalls(); }
     
     window.addSpecificContact = function(userId) { if (!me) return; const friend = db.users.find(u => u.id === userId); if (!friend) return showToast("Пользователь не найден"); if (me.friends.includes(userId)) return showToast("Уже в списке контактов"); if (friend.friendRequests && friend.friendRequests.includes(me.id)) return showToast("Заявка уже отправлена!"); if (me.friendRequests && me.friendRequests.includes(userId)) return acceptReq(userId); if (!friend.friendRequests) friend.friendRequests = []; friend.friendRequests.push(me.id); const uIdx = db.users.findIndex(u => u.id === userId); if(uIdx > -1) rtdb.ref(`/dg_app_data/users/${uIdx}/friendRequests`).set(friend.friendRequests); showToast("Заявка отправлена!"); closeModernProfile(); }
@@ -5505,14 +5508,14 @@ async function uploadToCloud(file) {
         if (me.friendRequests && me.friendRequests.length > 0) {
             reqContainer.innerHTML = '<div class="section-header" style="color:var(--p);">Заявки в друзья</div>' + me.friendRequests.map(id => {
                 const u = db.users.find(x => x.id === id); if(!u) return '';
-                return `<div class="list-item" style="cursor:default;"><div class="av-sm" onclick="startChat('${u.id}')" style="cursor:pointer;">${getAvatarHtml(u.avatarType, u.avatarValue)}</div><div class="list-info" onclick="startChat('${u.id}')" style="cursor:pointer;"><div class="list-name">${escapeHtml(u.name)}</div><div class="list-preview">Хочет добавить вас</div></div><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px;" onclick="acceptReq('${u.id}')">Принять</button><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px; background:var(--red); margin-left:6px;" onclick="rejectReq('${u.id}')"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button></div>`;
+                return `<div class="list-item" style="cursor:default;"><div class="av-sm" onclick="startChat('${u.id}')" style="cursor:pointer;">${getAvatarHtml(u.avatarType, u.avatarValue)}</div><div class="list-info" onclick="startChat('${u.id}')" style="cursor:pointer;"><div class="list-name">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}</div><div class="list-preview">Хочет добавить вас</div></div><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px;" onclick="acceptReq('${u.id}')">Принять</button><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px; background:var(--red); margin-left:6px;" onclick="rejectReq('${u.id}')"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button></div>`;
             }).join('');
         } else { reqContainer.innerHTML = ''; }
 
         const filter = document.getElementById('search-friends')?.value || ''; const container = document.getElementById('f-list'); 
         const friendUsers = me.friends.map(id => db.users.find(u => u && u.id === id)).filter(u => u && u.name.toLowerCase().includes(filter.toLowerCase())); 
         if (friendUsers.length === 0) { container.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined" style="font-size: 48px;">group</span>Список контактов пуст</div>'; return; } 
-        container.innerHTML = friendUsers.map(u => ` <div class="list-item" onclick="startChat('${u.id}')"> <div class="av-sm">${getAvatarHtml(u.avatarType, u.avatarValue)}</div> <div class="list-info"> <div class="list-name">${escapeHtml(u.name)}</div> <div class="list-preview">${getUserStatus(u)}</div> </div> </div> `).join(''); 
+        container.innerHTML = friendUsers.map(u => ` <div class="list-item" onclick="startChat('${u.id}')"> <div class="av-sm">${getAvatarHtml(u.avatarType, u.avatarValue)}</div> <div class="list-info"> <div class="list-name">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}</div> <div class="list-preview">${getUserStatus(u)}</div> </div> </div> `).join(''); 
     }
 
     async function linkEmail() {
