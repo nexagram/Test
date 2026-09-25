@@ -198,9 +198,52 @@
         .video-wrapper video { width: 100%; max-height: 300px; border-radius: 12px; background: #000; pointer-events: none; }
         .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; pointer-events: none; }
 
-        .video-circle { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; cursor: pointer; background: var(--in); pointer-events: auto !important; }
+        .video-circle {
+            width: 220px; height: 220px; max-width: 70vw; max-height: 70vw;
+            border-radius: 50% !important; object-fit: cover;
+            border: 3px solid transparent; cursor: pointer; background: var(--in);
+            pointer-events: auto !important; display: block;
+            overflow: hidden; aspect-ratio: 1 / 1;
+        }
         .sent .video-circle { border-color: rgba(0, 0, 0, 0.3); }
         .received .video-circle { border-color: var(--p); }
+        .media-content.circle-wrap {
+            background: none !important; border-radius: 50% !important;
+            overflow: hidden; width: 220px; height: 220px; max-width: 70vw; max-height: 70vw;
+            aspect-ratio: 1 / 1; padding: 0; margin-top: 4px;
+        }
+        .circle-speed-btn {
+            position: absolute; bottom: 12px; right: 12px; z-index: 2;
+        }
+        /* Волна при записи ГС в строке ввода */
+        .voice-rec-bar {
+            display: none; flex: 1; align-items: center; gap: 10px;
+            min-width: 0; padding: 8px 12px; border-radius: 24px;
+            background: rgba(255, 59, 48, 0.12); border: 1px solid rgba(255, 59, 48, 0.35);
+        }
+        .voice-rec-bar.active { display: flex; }
+        .voice-rec-wave {
+            flex: 1; display: flex; align-items: center; gap: 3px;
+            height: 28px; overflow: hidden;
+        }
+        .voice-rec-wave span {
+            width: 3px; border-radius: 2px; background: var(--red);
+            height: 6px; animation: voiceRecPulse 0.9s ease-in-out infinite;
+        }
+        .voice-rec-wave span:nth-child(2n) { animation-delay: 0.15s; }
+        .voice-rec-wave span:nth-child(3n) { animation-delay: 0.3s; }
+        .voice-rec-wave span:nth-child(4n) { animation-delay: 0.45s; }
+        @keyframes voiceRecPulse {
+            0%, 100% { height: 6px; opacity: 0.55; }
+            50% { height: 22px; opacity: 1; }
+        }
+        .voice-rec-time {
+            font-size: 13px; font-weight: 600; color: var(--red);
+            min-width: 42px; text-align: right; font-variant-numeric: tabular-nums;
+        }
+        .input-row.recording-voice .chat-input { display: none; }
+        .input-row.recording-voice #btn-circle { display: none; }
+        .input-row.recording-voice .send-btn { display: none; }
 
         .voice-player { background: rgba(0, 0, 0, 0.15); border-radius: 24px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; min-width: 200px; }
         .sent .voice-player { background: rgba(0, 0, 0, 0.1); }
@@ -1044,7 +1087,10 @@
                 <input type="file" id="attach-input" accept="*/*" style="display:none" onchange="handleAttachment(event)">
                 
                 <input type="text" id="m-in" class="chat-input" data-i18n-placeholder="ph_message" placeholder="Сообщение..." onkeypress="if(event.key==='Enter') send()" oninput="handleTyping()">
-                
+                <div class="voice-rec-bar" id="voice-rec-bar" aria-hidden="true">
+                    <div class="voice-rec-wave" id="voice-rec-wave"></div>
+                    <span class="voice-rec-time" id="voice-rec-time">0:00</span>
+                </div>
                 <div class="input-actions">
                     <button class="icon-btn" id="btn-circle" onclick="toggleVideoCircle()"><span class="material-symbols-outlined">videocam</span></button>
                     <button class="icon-btn" id="btn-voice" onclick="toggleVoice()"><span class="material-symbols-outlined">mic</span></button>
@@ -2639,10 +2685,7 @@
     }
 
     function verifiedBadgeHtml(obj) {
-        if (!obj) return '';
-        const lg = String(obj.login || obj.username || '').toLowerCase();
-        const always = !!obj.verified || !!obj.isAI || ['support', 'helper', 'ai', 'iskra'].includes(lg);
-        if (!always) return '';
+        if (!obj || !obj.verified) return '';
         return '<span class="verified-badge" title="Подтверждённый аккаунт"><span class="material-symbols-outlined">verified</span></span>';
     }
     function toggleUserVerified(userId) {
@@ -2800,7 +2843,7 @@ async function uploadToCloud(file) {
             let icon = ''; let color = 'var(--mut)';
             if (c.status === 'missed') { icon = isIncoming ? 'call_received' : 'call_made'; color = 'var(--red)'; } else if (c.status === 'declined') { icon = 'call_end'; color = 'var(--red)'; } else { icon = isIncoming ? 'call_received' : 'call_made'; color = isIncoming ? 'var(--p)' : 'var(--online)'; }
             const timeStr = new Date(c.time).toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); const durStr = c.duration ? ` • ${Math.floor(c.duration/60)}:${(c.duration%60).toString().padStart(2,'0')}` : '';
-            return `<div class="list-item" onclick="startChat('${other.id}')"><div class="av-sm">${getAvatarHtml(other.avatarType, other.avatarValue)}</div><div class="list-info"><div class="list-name" style="color:${c.status==='missed'&&isIncoming ? 'var(--red)' : 'var(--txt)'}">${escapeHtml(other.name)}${verifiedBadgeHtml(other)}</div><div class="list-preview" style="color: ${color}"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">${icon}</span> ${c.isVideo ? 'Видеозвонок' : 'Аудиозвонок'} ${durStr}<span style="color:var(--mut); margin-left:6px; font-weight:normal;">${timeStr}</span></div></div><button class="icon-btn" style="color:var(--p)" onclick="event.stopPropagation(); startChat('${other.id}'); setTimeout(()=>initiateCall(${c.isVideo}), 50);"><span class="material-symbols-outlined">call</span></button></div>`;
+            return `<div class="list-item" onclick="startChat('${other.id}')"><div class="av-sm">${getAvatarHtml(other.avatarType, other.avatarValue)}</div><div class="list-info"><div class="list-name" style="color:${c.status==='missed'&&isIncoming ? 'var(--red)' : 'var(--txt)'}">${escapeHtml(other.name)}</div><div class="list-preview" style="color: ${color}"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">${icon}</span> ${c.isVideo ? 'Видеозвонок' : 'Аудиозвонок'} ${durStr}<span style="color:var(--mut); margin-left:6px; font-weight:normal;">${timeStr}</span></div></div><button class="icon-btn" style="color:var(--p)" onclick="event.stopPropagation(); startChat('${other.id}'); setTimeout(()=>initiateCall(${c.isVideo}), 50);"><span class="material-symbols-outlined">call</span></button></div>`;
         }).join('');
     }
 
@@ -3522,15 +3565,12 @@ async function uploadToCloud(file) {
         if (!passwordVal || passwordVal.length < 4) return showToast('Пароль от 4 символов');
         if (passwordVal !== confirmVal) return showToast('Пароли не совпадают!');
         if (!isEmail && (!secretVal || secretVal.length < 3)) return showToast('Секретное слово от 3 символов');
-        const RESERVED_LOGINS = ['support', 'helper', 'ai', 'iskra', 'nexagram', 'system', 'root', 'null', 'undefined', 'demo'];
-        if (!isEmail && RESERVED_LOGINS.includes(loginLower)) return showToast('Этот юзернейм недоступен');
         if (!isEmail && db.users.find(u => u.login === loginLower)) return showToast('Логин занят');
         
         if (isEmail) {
             let customLogin = prompt("Уникальный логин (без @):");
             if (!customLogin || customLogin.trim().length < 3 || customLogin.includes('@')) { return showToast('Некорректный логин.'); }
             customLogin = customLogin.trim().toLowerCase();
-            if (RESERVED_LOGINS.includes(customLogin)) return showToast('Этот юзернейм недоступен');
             if (db.users.find(u => u.login === customLogin)) { return showToast('Этот логин занят.'); }
 
             try {
@@ -3985,7 +4025,7 @@ async function uploadToCloud(file) {
         const story = userStories[currentStoryIdx]; const user = db.users.find(u => u.id === currentStoryUser); if (!user) { closeStory(); return; }
         
         document.getElementById('storyViewerAv').innerHTML = getAvatarHtml(user.avatarType, user.avatarValue);
-        document.getElementById('storyViewerName').innerHTML = `${escapeHtml(user.name)}${verifiedBadgeHtml(user)} <span style="opacity:0.6; font-weight:400; margin-left:4px;">${currentStoryIdx + 1}/${userStories.length}</span>`;
+        document.getElementById('storyViewerName').innerHTML = `${escapeHtml(user.name)} <span style="opacity:0.6; font-weight:400; margin-left:4px;">${currentStoryIdx + 1}/${userStories.length}</span>`;
         const h = Math.floor((now - story.time) / (1000 * 60 * 60)); document.getElementById('storyViewerTime').textContent = h > 0 ? `${h} ч назад` : 'Только что';
         document.getElementById('storyDelBtn').style.display = (currentStoryUser === me.id) ? 'block' : 'none';
 
@@ -4409,9 +4449,7 @@ async function uploadToCloud(file) {
                 name = chat.name || (chat.type === 'channel' ? 'Канал' : 'Группа');
                 avType = chat.avatarType; avVal = chat.avatarValue;
                 // Канал — иконка рупора, у групп без смайлика
-                badge = verifiedBadgeHtml(chat) + (chat.type === 'channel'
-                    ? ' <span class="material-symbols-outlined" style="font-size: 14px;">campaign</span>'
-                    : '');
+                badge = verifiedBadgeHtml(chat); // без иконок канала/группы
             }
             const lastMsg = chat.msgs && chat.msgs.length ? chat.msgs[chat.msgs.length - 1] : null;
             let preview = drafts[chat.id] ? `<span style="color:var(--red);">Черновик:</span> ${escapeHtml(drafts[chat.id])}` : 'Нет сообщений';
@@ -4626,7 +4664,7 @@ async function uploadToCloud(file) {
             let authorNameHtml = '';
             if (!isSent && (activeChat.type === 'group' || activeChat.type === 'channel')) {
                 const author = db.users.find(u => u.id === msg.uid);
-                authorNameHtml = `<div class="msg-author">${escapeHtml(author ? author.name : 'Unknown')}${author ? verifiedBadgeHtml(author) : ''}</div>`;
+                authorNameHtml = `<div class="msg-author">${escapeHtml(author ? author.name : 'Unknown')}</div>`;
             }
             let replyHtml = '';
             if (msg.reply) replyHtml = `<div class="msg-quote">${escapeHtml(msg.reply.txt || 'Медиа')}</div>`;
@@ -4634,7 +4672,7 @@ async function uploadToCloud(file) {
             if (msg.type === 'voice' || msg.type === 'audio') content = `<div class="voice-msg-placeholder" data-idx="${idx}"></div>`;
             else if (msg.type === 'image') content = `<div class="media-content"><img src="${escapeHtml(msg.url)}" onclick="openMedia(${idx})"></div>`;
             else if (msg.type === 'video') content = `<div class="media-content video-wrapper" onclick="openMedia(${idx})"><video src="${escapeHtml(msg.url)}"></video><div class="play-overlay"><span class="material-symbols-outlined">play_arrow</span></div></div>`;
-            else if (msg.type === 'video_circle') content = `<div class="media-content" style="background: none; position:relative;"><video src="${escapeHtml(msg.url)}" autoplay loop playsinline class="video-circle" onclick="this.muted = !this.muted" muted></video><button class="voice-speed-btn circle-speed-btn" onclick="event.stopPropagation(); const v = this.previousElementSibling; if(v.playbackRate===1){v.playbackRate=1.5;this.textContent='1.5x';}else if(v.playbackRate===1.5){v.playbackRate=2;this.textContent='2x';}else{v.playbackRate=1;this.textContent='1x';}">1x</button></div>`;
+            else if (msg.type === 'video_circle') content = `<div class="media-content circle-wrap" style="position:relative;"><video src="${escapeHtml(msg.url)}" autoplay loop playsinline class="video-circle" onclick="this.muted = !this.muted" muted></video><button class="voice-speed-btn circle-speed-btn" onclick="event.stopPropagation(); const v = this.previousElementSibling; if(v.playbackRate===1){v.playbackRate=1.5;this.textContent='1.5x';}else if(v.playbackRate===1.5){v.playbackRate=2;this.textContent='2x';}else{v.playbackRate=1;this.textContent='1x';}">1x</button></div>`;
             else if (msg.type === 'file') content = `<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:12px;margin-top:4px;"><span class="material-symbols-outlined">description</span><a href="${escapeHtml(msg.url)}" target="_blank" style="color:inherit;text-decoration:none;font-weight:600;font-size:15px;word-break:break-all;">Скачать файл</a></div>`;
             else content = `<div>${escapeHtml(msg.txt || '')}</div>`;
             
@@ -4788,6 +4826,103 @@ async function uploadToCloud(file) {
         }
     }
 
+
+    let voiceRecTimer = null;
+    let voiceRecStartedAt = 0;
+    let voiceRecAnimRaf = null;
+    let voiceRecAnalyser = null;
+    let voiceRecSource = null;
+
+    function buildVoiceRecWaveBars() {
+        const wave = document.getElementById('voice-rec-wave');
+        if (!wave || wave.childElementCount) return;
+        for (let i = 0; i < 18; i++) {
+            const s = document.createElement('span');
+            s.style.animationDelay = ((i % 6) * 0.08) + 's';
+            wave.appendChild(s);
+        }
+    }
+
+    function setVoiceRecUI(on) {
+        const row = document.querySelector('#chat-input-area .input-row');
+        const bar = document.getElementById('voice-rec-bar');
+        const btn = document.getElementById('btn-voice');
+        if (row) row.classList.toggle('recording-voice', !!on);
+        if (bar) {
+            bar.classList.toggle('active', !!on);
+            bar.setAttribute('aria-hidden', on ? 'false' : 'true');
+        }
+        if (btn) {
+            btn.classList.toggle('recording-pulse', !!on);
+            btn.innerHTML = on
+                ? '<span class="material-symbols-outlined">stop</span>'
+                : '<span class="material-symbols-outlined">mic</span>';
+        }
+        if (on) {
+            buildVoiceRecWaveBars();
+            voiceRecStartedAt = Date.now();
+            const timeEl = document.getElementById('voice-rec-time');
+            if (voiceRecTimer) clearInterval(voiceRecTimer);
+            voiceRecTimer = setInterval(() => {
+                const sec = Math.floor((Date.now() - voiceRecStartedAt) / 1000);
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                if (timeEl) timeEl.textContent = m + ':' + String(s).padStart(2, '0');
+            }, 250);
+        } else {
+            if (voiceRecTimer) { clearInterval(voiceRecTimer); voiceRecTimer = null; }
+            const timeEl = document.getElementById('voice-rec-time');
+            if (timeEl) timeEl.textContent = '0:00';
+            stopInputVoiceWave();
+        }
+    }
+
+    function startInputVoiceWave(stream) {
+        stopInputVoiceWave();
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            if (!audioCtx) audioCtx = new AC();
+            if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+            voiceRecAnalyser = audioCtx.createAnalyser();
+            voiceRecAnalyser.fftSize = 128;
+            voiceRecAnalyser.smoothingTimeConstant = 0.75;
+            voiceRecSource = audioCtx.createMediaStreamSource(stream);
+            voiceRecSource.connect(voiceRecAnalyser);
+            const data = new Uint8Array(voiceRecAnalyser.frequencyBinCount);
+            const wave = document.getElementById('voice-rec-wave');
+            const tick = () => {
+                voiceRecAnimRaf = requestAnimationFrame(tick);
+                if (!voiceRecAnalyser || !wave) return;
+                voiceRecAnalyser.getByteFrequencyData(data);
+                const bars = wave.querySelectorAll('span');
+                const step = Math.max(1, Math.floor(data.length / Math.max(1, bars.length)));
+                bars.forEach((bar, i) => {
+                    const v = data[Math.min(data.length - 1, i * step)] || 0;
+                    const h = 4 + (v / 255) * 22;
+                    bar.style.height = h + 'px';
+                    bar.style.animation = 'none';
+                });
+            };
+            tick();
+        } catch (e) { console.warn('input voice wave', e); }
+    }
+
+    function stopInputVoiceWave() {
+        if (voiceRecAnimRaf) { cancelAnimationFrame(voiceRecAnimRaf); voiceRecAnimRaf = null; }
+        try { if (voiceRecSource) voiceRecSource.disconnect(); } catch (_) {}
+        voiceRecSource = null;
+        voiceRecAnalyser = null;
+        const wave = document.getElementById('voice-rec-wave');
+        if (wave) {
+            wave.querySelectorAll('span').forEach((bar, i) => {
+                bar.style.height = '';
+                bar.style.animation = '';
+                bar.style.animationDelay = ((i % 6) * 0.08) + 's';
+            });
+        }
+    }
+
     function toggleVoice() {
         if (!activeChat) return;
         if (activeChat.type === 'direct') {
@@ -4795,14 +4930,14 @@ async function uploadToCloud(file) {
             const ou = db.users.find(u => u && u.id === oid);
             if (isAIUser(ou) || isAIUser(oid)) return showToast('Искре можно отправлять только текст');
         } const btn = document.getElementById('btn-voice');
-        if (isRecordingVoice) { mediaRecorder.stop(); isRecordingVoice = false; btn.classList.remove('recording-pulse'); } 
+        if (isRecordingVoice) { mediaRecorder.stop(); isRecordingVoice = false; setVoiceRecUI(false); } 
         else {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                    isRecordingVoice = true; btn.classList.add('recording-pulse');
+                    isRecordingVoice = true; setVoiceRecUI(true); startInputVoiceWave(stream);
                     let options = undefined; if (MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/webm' }; else if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
                     mediaRecorder = new MediaRecorder(stream, options); recordedChunks = []; mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
-                    mediaRecorder.onstop = async () => { const finalMime = mediaRecorder.mimeType || 'audio/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm'; const blob = new Blob(recordedChunks, { type: finalMime }); const file = new File([blob], 'voice.' + ext, { type: finalMime }); const url = await uploadToCloud(file); if (url) { const chatIndex = ensureChatInDb(); if (chatIndex > -1) { const msgObj = { uid: me.id, type: 'voice', url: url, time: Date.now(), reactions: {} }; if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); } if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = []; db.chats[chatIndex].msgs.push(msgObj); rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs); if (activeChat.id === db.chats[chatIndex].id) renderMsgs(); } } stream.getTracks().forEach(t => t.stop()); }; mediaRecorder.start();
+                    mediaRecorder.onstop = async () => { setVoiceRecUI(false); const finalMime = mediaRecorder.mimeType || 'audio/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm'; const blob = new Blob(recordedChunks, { type: finalMime }); const file = new File([blob], 'voice.' + ext, { type: finalMime }); const url = await uploadToCloud(file); if (url) { const chatIndex = ensureChatInDb(); if (chatIndex > -1) { const msgObj = { uid: me.id, type: 'voice', url: url, time: Date.now(), reactions: {} }; if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); } if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = []; db.chats[chatIndex].msgs.push(msgObj); rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs); if (activeChat.id === db.chats[chatIndex].id) renderMsgs(); } } stream.getTracks().forEach(t => t.stop()); }; mediaRecorder.start();
                 }).catch(() => showToast("Нет доступа к микрофону"));
             } else { showToast("Браузер не поддерживает запись голоса"); }
         }
@@ -4869,7 +5004,7 @@ async function uploadToCloud(file) {
                 <div class="account-item" onclick="forceLogin('${u.id}')">
                     <div class="account-avatar">${getAvatarHtml(u.avatarType, u.avatarValue)}</div>
                     <div class="account-info">
-                        <div class="account-name">${escapeHtml(u.name || u.login)}${verifiedBadgeHtml(u)}</div>
+                        <div class="account-name">${escapeHtml(u.name || u.login)}</div>
                         <div class="account-login">@${escapeHtml(u.login)}</div>
                     </div>
                 </div>`).join('');
@@ -4894,7 +5029,7 @@ async function uploadToCloud(file) {
                     <div onclick="forceLogin('${a.id}')" style="display:flex;align-items:center;gap:14px;flex:1;">
                         <div class="account-avatar">${getAvatarHtml(avType, avVal)}</div>
                         <div class="account-info">
-                            <div class="account-name">${escapeHtml(name)}${verifiedBadgeHtml(live || { login: login })}</div>
+                            <div class="account-name">${escapeHtml(name)}</div>
                             <div class="account-login">@${escapeHtml(login)}</div>
                         </div>
                     </div>
@@ -4961,7 +5096,7 @@ async function uploadToCloud(file) {
                 <div style="display: flex; align-items: center; gap: 14px;">
                     <div class="account-avatar">${getAvatarHtml(u.avatarType, u.avatarValue)}</div>
                     <div class="account-info">
-                        <div class="account-name" style="${u.isBanned ? 'text-decoration: line-through; color: var(--mut);' : ''}">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}${isSelf ? ' (вы)' : ''}</div>
+                        <div class="account-name" style="${u.isBanned ? 'text-decoration: line-through; color: var(--mut);' : ''}">${escapeHtml(u.name)}${verifiedBadgeHtml(u)} ${isSuperAdmin(u) ? '👑' : ''}${isSelf ? ' (вы)' : ''}</div>
                         <div class="account-login">@${escapeHtml(u.login)}</div>
                     </div>
                 </div>
@@ -5303,7 +5438,7 @@ async function uploadToCloud(file) {
             const otherId = activeChat.u1 === me.id ? activeChat.u2 : activeChat.u1; 
             const contact = db.users.find(u => u.id === otherId);
             const isFriend = me.friends.includes(contact.id);
-            const starHtml = ''; // звёздочки админов убраны
+            const starHtml = isSuperAdmin(contact) ? ' <span style="color: #007aff; font-size: 18px;">★</span>' : '';
             const vBadge = verifiedBadgeHtml(contact);
             const isContactAI = isAIUser(contact);
             
@@ -5331,7 +5466,7 @@ async function uploadToCloud(file) {
                 <div class="mp-av-wrap" onclick="openAvatarModalView('${contact.avatarType}', '${contact.avatarValue}')" style="cursor: pointer;">
                     ${getAvatarHtml(contact.avatarType, contact.avatarValue)}
                 </div>
-                <div class="mp-name">${escapeHtml(contact.name)}${vBadge}</div>
+                <div class="mp-name">${escapeHtml(contact.name)}${vBadge}${starHtml}</div>
                 <div class="mp-status">${getUserStatus(contact)}</div>
                 
                 <div class="mp-actions">
@@ -5397,7 +5532,7 @@ async function uploadToCloud(file) {
                     membersHtml += `<div class="mp-info-row" style="padding: 12px 16px; border-radius: ${radius};">
                         <div style="display:flex; align-items:center; gap: 12px;">
                             <div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:var(--in); display:flex; align-items:center; justify-content:center; font-size:18px;">${getAvatarHtml(mUser.avatarType, mUser.avatarValue)}</div>
-                            <div class="mp-info-text"><div class="mp-info-title" style="font-size:15px;">${escapeHtml(mUser.name)}${verifiedBadgeHtml(mUser)}${isMemCreator ? ' · создатель' : (isMemAdmin ? ' · админ' : '')}</div></div>
+                            <div class="mp-info-text"><div class="mp-info-title" style="font-size:15px;">${escapeHtml(mUser.name)} ${isMemCreator ? '⭐️' : (isMemAdmin ? '👑' : '')}</div></div>
                         </div>
                         <div>${actionBtn}</div>
                     </div>`; 
@@ -5493,7 +5628,7 @@ async function uploadToCloud(file) {
     }
     function toggleLightMode() { localSettings.lightMode = !localSettings.lightMode; localStorage.setItem('Nexagram_Settings', JSON.stringify(localSettings)); if (localSettings.lightMode) { document.documentElement.setAttribute('data-theme', 'light'); document.getElementById('themeIcon').textContent = 'dark_mode'; } else { document.documentElement.removeAttribute('data-theme'); document.getElementById('themeIcon').textContent = 'light_mode'; } }
     
-    function updUI() { if (!me) return; document.getElementById('p-name').innerHTML = escapeHtml(me.name) + verifiedBadgeHtml(me); document.getElementById('p-log').textContent = '@' + me.login; document.getElementById('p-bio').textContent = me.bio ? me.bio : 'Расскажите о себе...'; renderAvatar(document.getElementById('p-av'), me.avatarType, me.avatarValue); if (isSuperAdmin(me)) { document.getElementById('admin-switch-btn').style.display = 'flex'; document.getElementById('admin-panel-btn').style.display = 'flex'; } else { document.getElementById('admin-switch-btn').style.display = 'none'; document.getElementById('admin-panel-btn').style.display = 'none'; } }
+    function updUI() { if (!me) return; document.getElementById('p-name').textContent = me.name; document.getElementById('p-log').textContent = '@' + me.login; document.getElementById('p-bio').textContent = me.bio ? me.bio : 'Расскажите о себе...'; renderAvatar(document.getElementById('p-av'), me.avatarType, me.avatarValue); if (isSuperAdmin(me)) { document.getElementById('admin-switch-btn').style.display = 'flex'; document.getElementById('admin-panel-btn').style.display = 'flex'; } else { document.getElementById('admin-switch-btn').style.display = 'none'; document.getElementById('admin-panel-btn').style.display = 'none'; } }
     function setTab(tab) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(tab + '-screen').classList.add('active'); document.getElementById('nb-' + tab).classList.add('active'); if (tab === 'friends') renderFriends(); if (tab === 'chats') renderChats(); if (tab === 'calls') renderCalls(); }
     
     window.addSpecificContact = function(userId) { if (!me) return; const friend = db.users.find(u => u.id === userId); if (!friend) return showToast("Пользователь не найден"); if (me.friends.includes(userId)) return showToast("Уже в списке контактов"); if (friend.friendRequests && friend.friendRequests.includes(me.id)) return showToast("Заявка уже отправлена!"); if (me.friendRequests && me.friendRequests.includes(userId)) return acceptReq(userId); if (!friend.friendRequests) friend.friendRequests = []; friend.friendRequests.push(me.id); const uIdx = db.users.findIndex(u => u.id === userId); if(uIdx > -1) rtdb.ref(`/dg_app_data/users/${uIdx}/friendRequests`).set(friend.friendRequests); showToast("Заявка отправлена!"); closeModernProfile(); }
@@ -5508,14 +5643,14 @@ async function uploadToCloud(file) {
         if (me.friendRequests && me.friendRequests.length > 0) {
             reqContainer.innerHTML = '<div class="section-header" style="color:var(--p);">Заявки в друзья</div>' + me.friendRequests.map(id => {
                 const u = db.users.find(x => x.id === id); if(!u) return '';
-                return `<div class="list-item" style="cursor:default;"><div class="av-sm" onclick="startChat('${u.id}')" style="cursor:pointer;">${getAvatarHtml(u.avatarType, u.avatarValue)}</div><div class="list-info" onclick="startChat('${u.id}')" style="cursor:pointer;"><div class="list-name">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}</div><div class="list-preview">Хочет добавить вас</div></div><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px;" onclick="acceptReq('${u.id}')">Принять</button><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px; background:var(--red); margin-left:6px;" onclick="rejectReq('${u.id}')"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button></div>`;
+                return `<div class="list-item" style="cursor:default;"><div class="av-sm" onclick="startChat('${u.id}')" style="cursor:pointer;">${getAvatarHtml(u.avatarType, u.avatarValue)}</div><div class="list-info" onclick="startChat('${u.id}')" style="cursor:pointer;"><div class="list-name">${escapeHtml(u.name)}</div><div class="list-preview">Хочет добавить вас</div></div><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px;" onclick="acceptReq('${u.id}')">Принять</button><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px; background:var(--red); margin-left:6px;" onclick="rejectReq('${u.id}')"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button></div>`;
             }).join('');
         } else { reqContainer.innerHTML = ''; }
 
         const filter = document.getElementById('search-friends')?.value || ''; const container = document.getElementById('f-list'); 
         const friendUsers = me.friends.map(id => db.users.find(u => u && u.id === id)).filter(u => u && u.name.toLowerCase().includes(filter.toLowerCase())); 
         if (friendUsers.length === 0) { container.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined" style="font-size: 48px;">group</span>Список контактов пуст</div>'; return; } 
-        container.innerHTML = friendUsers.map(u => ` <div class="list-item" onclick="startChat('${u.id}')"> <div class="av-sm">${getAvatarHtml(u.avatarType, u.avatarValue)}</div> <div class="list-info"> <div class="list-name">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}</div> <div class="list-preview">${getUserStatus(u)}</div> </div> </div> `).join(''); 
+        container.innerHTML = friendUsers.map(u => ` <div class="list-item" onclick="startChat('${u.id}')"> <div class="av-sm">${getAvatarHtml(u.avatarType, u.avatarValue)}</div> <div class="list-info"> <div class="list-name">${escapeHtml(u.name)}</div> <div class="list-preview">${getUserStatus(u)}</div> </div> </div> `).join(''); 
     }
 
     async function linkEmail() {
