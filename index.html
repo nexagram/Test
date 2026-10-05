@@ -198,9 +198,72 @@
         .video-wrapper video { width: 100%; max-height: 300px; border-radius: 12px; background: #000; pointer-events: none; }
         .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; pointer-events: none; }
 
-        .video-circle { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; cursor: pointer; background: var(--in); pointer-events: auto !important; }
-        .sent .video-circle { border-color: rgba(0, 0, 0, 0.3); }
+        .video-circle {
+            width: 220px; height: 220px; max-width: 72vw; max-height: 72vw;
+            border-radius: 50% !important; object-fit: cover; aspect-ratio: 1/1;
+            border: 3px solid transparent; cursor: pointer; background: #111;
+            pointer-events: auto !important; display: block; overflow: hidden;
+        }
+        .sent .video-circle { border-color: rgba(255,255,255,0.35); }
         .received .video-circle { border-color: var(--p); }
+        .media-content.circle-wrap {
+            background: none !important; border-radius: 50% !important;
+            overflow: visible; width: 220px; height: 220px; max-width: 72vw; max-height: 72vw;
+            aspect-ratio: 1/1; padding: 0; margin: 0; position: relative;
+        }
+        /* кружок без оранжевого/серого квадратного пузыря */
+        .m-body:has(.video-circle) {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            overflow: visible;
+        }
+        .m-body:has(.video-circle) .msg-time {
+            position: absolute; right: 10px; bottom: 8px; z-index: 3;
+            color: #fff !important; text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.35); padding: 2px 8px; border-radius: 10px;
+        }
+        .m-body:has(.video-circle) .read-receipt { color: rgba(255,255,255,0.85); }
+        .m-body:has(.video-circle) .read-receipt.read { color: #53bdeb; }
+        .circle-speed-btn { position: absolute; bottom: 12px; left: 12px; z-index: 2; }
+
+        .read-receipt { color: rgba(0,0,0,0.4); }
+        .read-receipt.pending { color: rgba(0,0,0,0.35); }
+        .read-receipt.read { color: #53bdeb !important; }
+        .received .read-receipt { display: none; }
+
+        /* Волна записи ГС */
+        .voice-rec-bar {
+            display: none; flex: 1; align-items: center; gap: 10px;
+            min-width: 0; padding: 8px 14px; border-radius: 24px;
+            background: rgba(255, 59, 48, 0.14); border: 1px solid rgba(255, 59, 48, 0.4);
+        }
+        .voice-rec-bar.active { display: flex; }
+        .voice-rec-wave {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            gap: 2.5px; height: 32px; overflow: hidden;
+        }
+        .voice-rec-wave span {
+            width: 3px; min-height: 4px; border-radius: 2px;
+            background: var(--red); height: 8px;
+            transition: height 0.05s linear;
+            animation: voiceBounce 0.55s ease-in-out infinite alternate;
+        }
+        .voice-rec-wave span:nth-child(odd) { animation-duration: 0.42s; }
+        .voice-rec-wave span:nth-child(3n) { animation-duration: 0.68s; }
+        .voice-rec-wave span:nth-child(4n) { animation-duration: 0.5s; }
+        @keyframes voiceBounce {
+            from { height: 5px; opacity: 0.55; transform: scaleY(0.7); }
+            to { height: 26px; opacity: 1; transform: scaleY(1); }
+        }
+        .voice-rec-time {
+            font-size: 13px; font-weight: 700; color: var(--red);
+            min-width: 44px; text-align: right; font-variant-numeric: tabular-nums;
+        }
+        .input-row.recording-voice .chat-input { display: none; }
+        .input-row.recording-voice #btn-circle { display: none; }
+        .input-row.recording-voice .send-btn { display: none; }
 
         .voice-player { background: rgba(0, 0, 0, 0.15); border-radius: 24px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; min-width: 200px; }
         .sent .voice-player { background: rgba(0, 0, 0, 0.1); }
@@ -233,6 +296,10 @@
         .back-btn { background: none; border: none; color: var(--p); font-size: 28px; cursor: pointer; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-right: 4px; flex-shrink: 0; transition: transform 0.2s;}
         .back-btn:active { transform: translateX(-5px); }
         
+        .tab-loading { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; background: var(--bg); flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--mut); font-size: 15px; font-weight: 600; }
+        .tab-loading .material-symbols-outlined { font-size: 56px; color: var(--p); animation: tabLoadPulse 1.2s ease-in-out infinite; }
+        @keyframes tabLoadPulse { 0%,100% { opacity: 0.35; transform: scale(0.94); } 50% { opacity: 1; transform: scale(1); } }
+        #app.booting .tab-loading { display: flex; }
         #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; opacity: 0; transition: opacity 0.3s;}
         .spinner { width: 40px; height: 40px; border: 4px solid var(--in); border-top: 4px solid var(--p); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -801,8 +868,12 @@
         
         <div class="auth-form" id="registerForm">
             <div class="input-group">
-                <label data-i18n="login_label">Логин (без @) или Email</label>
-                <input type="text" id="regUsername" data-i18n-placeholder="ph_login" placeholder="Email или логин" autocomplete="username">
+                <label>Почта</label>
+                <input type="email" id="regEmail" placeholder="name@example.com" autocomplete="email">
+            </div>
+            <div class="input-group">
+                <label>Юзернейм</label>
+                <input type="text" id="regUsername" placeholder="Юзернейм (без @)" autocomplete="username">
             </div>
             <div class="input-group">
                 <label data-i18n="pass_label">Пароль</label>
@@ -811,10 +882,6 @@
             <div class="input-group">
                 <label data-i18n="pass_confirm">Подтверждение пароля</label>
                 <input type="password" id="regConfirm" data-i18n-placeholder="ph_pass_confirm" placeholder="Повторите пароль" autocomplete="new-password">
-            </div>
-            <div class="input-group secret-field visible" id="secretGroup">
-                <label data-i18n="secret_label">Секретное слово (если без Email)</label>
-                <input type="text" id="regSecret" data-i18n-placeholder="ph_secret" placeholder="Для восстановления аккаунта">
             </div>
             <button class="auth-btn" onclick="doRegister()" data-i18n="btn_register">Зарегистрироваться →</button>
         </div>
@@ -874,6 +941,7 @@
     <div class="content">
         <!-- ВКЛАДКИ -->
         <div class="screen" id="friends-screen">
+            <div class="tab-loading"><span class="material-symbols-outlined">group</span><div>Загружаем контакты…</div></div>
             <div class="head">Контакты</div>
             <div id="f-requests"></div>
             <div class="search-bar"><input type="text" id="search-friends" class="search-input" data-i18n-placeholder="search_contacts" placeholder="Поиск контактов..." onkeyup="filterFriends()"></div>
@@ -882,6 +950,7 @@
         </div>
 
         <div class="screen active" id="chats-screen">
+            <div class="tab-loading"><span class="material-symbols-outlined">chat</span><div>Загружаем чаты…</div></div>
             <div class="head head-chats">
                 <div class="head-left">
                     <span class="head-title" data-i18n="head_chats">Чаты</span>
@@ -905,6 +974,7 @@
         </div>
 
         <div class="screen" id="calls-screen">
+            <div class="tab-loading"><span class="material-symbols-outlined">call</span><div>Загружаем звонки…</div></div>
             <div class="head">
                 Журнал вызовов
                 <div class="chat-actions">
@@ -915,6 +985,7 @@
         </div>
 
         <div class="screen" id="profile-screen">
+            <div class="tab-loading"><span class="material-symbols-outlined">settings</span><div>Загружаем профиль…</div></div>
             <div class="head">Настройки</div>
             <div class="prof-top">
                 <div class="av-big editable-avatar" id="p-av" onclick="openAvatarSelector()"></div>
@@ -965,7 +1036,6 @@
                 </div>
                 <div class="sett-row" onclick="openSoundSettings()"><span class="material-symbols-outlined">volume_up</span> <span data-i18n="sett_sound">Настройки звука</span></div>
                 <div class="sett-row" onclick="requestNotifications()"><span class="material-symbols-outlined">notifications_active</span> <span data-i18n="sett_notif">Включить уведомления</span></div>
-                <div class="sett-row" onclick="openNtfySettings()"><span class="material-symbols-outlined">cloud_upload</span> ntfy-уведомления</div>
                 <div class="sett-row" onclick="openSupportChat()"><span class="material-symbols-outlined">support_agent</span> <span data-i18n="sett_support">Чат с поддержкой</span></div>
                 <div class="sett-row" id="admin-switch-btn" style="display: none;" onclick="switchAccount()"><span class="material-symbols-outlined">swap_horiz</span> Сменить аккаунт (Админ)</div>
                 <div class="sett-row" id="admin-panel-btn" style="display: none; color: #a855f7; font-weight: bold;" onclick="openAdminPanel()"><span class="material-symbols-outlined">admin_panel_settings</span> Управление пользователями</div>
@@ -1045,7 +1115,10 @@
                 <input type="file" id="attach-input" accept="*/*" style="display:none" onchange="handleAttachment(event)">
                 
                 <input type="text" id="m-in" class="chat-input" data-i18n-placeholder="ph_message" placeholder="Сообщение..." onkeypress="if(event.key==='Enter') send()" oninput="handleTyping()">
-                
+                <div class="voice-rec-bar" id="voice-rec-bar" aria-hidden="true">
+                    <div class="voice-rec-wave" id="voice-rec-wave"></div>
+                    <span class="voice-rec-time" id="voice-rec-time">0:00</span>
+                </div>
                 <div class="input-actions">
                     <button class="icon-btn" id="btn-circle" onclick="toggleVideoCircle()"><span class="material-symbols-outlined">videocam</span></button>
                     <button class="icon-btn" id="btn-voice" onclick="toggleVoice()"><span class="material-symbols-outlined">mic</span></button>
@@ -1505,60 +1578,6 @@
             }
         } catch (e) {
             try { new Notification(title, options); } catch (_) {}
-        }
-    }
-
-
-    // ===== ntfy.sh push (без текста сообщения) =====
-    function getNtfyTopic() {
-        try {
-            if (localSettings && localSettings.ntfyTopic) return String(localSettings.ntfyTopic).trim();
-        } catch (_) {}
-        try {
-            return (localStorage.getItem('Nexagram_NtfyTopic') || '').trim();
-        } catch (_) { return ''; }
-    }
-    function setNtfyTopic(topic) {
-        topic = String(topic || '').trim().replace(/^https?:\/\/ntfy\.sh\//i, '').replace(/^\//, '');
-        if (!localSettings) localSettings = {};
-        localSettings.ntfyTopic = topic;
-        try { localStorage.setItem('Nexagram_Settings', JSON.stringify(localSettings)); } catch (_) {}
-        try { localStorage.setItem('Nexagram_NtfyTopic', topic); } catch (_) {}
-    }
-    function openNtfySettings() {
-        const cur = getNtfyTopic();
-        const v = prompt(
-            'Топик ntfy (например my-nexagram-123)\\n\\nУстановите приложение ntfy и подпишитесь на этот топик.\\nОставьте пустым, чтобы отключить.\\n\\nТекущий:',
-            cur || ''
-        );
-        if (v === null) return;
-        setNtfyTopic(v);
-        if (v.trim()) {
-            showToast('ntfy: ' + v.trim());
-            try { sendNtfyPush('Nexagram', 'Уведомления подключены', 'test'); } catch (_) {}
-        } else {
-            showToast('ntfy отключён');
-        }
-    }
-    async function sendNtfyPush(title, body, tag) {
-        const topic = getNtfyTopic();
-        if (!topic) return;
-        // Не светим текст переписки — только заголовок + «от кого»
-        const safeTitle = String(title || 'Новое сообщение').slice(0, 120);
-        const safeBody = String(body || 'Новое сообщение').slice(0, 200);
-        try {
-            await fetch('https://ntfy.sh/' + encodeURIComponent(topic), {
-                method: 'POST',
-                headers: {
-                    'Title': safeTitle,
-                    'Priority': 'default',
-                    'Tags': 'speech_balloon',
-                    'Click': (typeof location !== 'undefined' ? location.origin + location.pathname : ''),
-                },
-                body: safeBody
-            });
-        } catch (e) {
-            console.warn('ntfy push failed', e);
         }
     }
 
@@ -2060,7 +2079,7 @@
                 const idx = db.users.findIndex(u => u.id === user.id);
                 if (idx > -1) {
                     db.users[idx].emailOk = true;
-                    await rtdb.ref('/dg_app_data/users').set(db.users);
+                    await safeSaveUsers();
                 }
             }
             hideLoader && hideLoader();
@@ -2280,10 +2299,46 @@
         ] 
     };
 
-    function isSuperAdmin(user) { if (!user) return false; return ['helper', 'demo', 'admin'].includes(user.login.toLowerCase()) || user.isGlobalAdmin; }
+    function isSuperAdmin(user) { if (!user) return false; return ['helper', 'support', 'ai'].includes(String(user.login || '').toLowerCase()) || !!user.isGlobalAdmin; }
 
-    document.getElementById('loader').style.display = 'flex';
-    document.getElementById('loader').style.opacity = '1';
+    // ---- Защита базы пользователей: не пишем список, пока он не загружен с сервера ----
+    let usersLoadedOk = false, serverUserCount = 0;
+    function safeSaveUsers(allowShrink) {
+        if (!usersLoadedOk) { console.warn('Запись users заблокирована: база ещё не загружена'); return Promise.resolve(false); }
+        if (!allowShrink && db.users.length < serverUserCount) { console.warn('Запись users заблокирована: список короче серверного'); return Promise.resolve(false); }
+        return rtdb.ref('/dg_app_data/users').set(db.users).then(() => true);
+    }
+    async function appendUser(user) {
+        for (let i = 0; i < 40 && !usersLoadedOk; i++) await new Promise(r => setTimeout(r, 200));
+        if (!usersLoadedOk) throw new Error('База ещё не загружена, попробуйте позже');
+        await rtdb.ref('/dg_app_data/users').transaction(cur => {
+            if (cur && !Array.isArray(cur) && typeof cur === 'object') {
+                const vals = Object.values(cur); if (vals.some(u => u && u.id === user.id)) return;
+                const keys = Object.keys(cur).map(Number).filter(n => !isNaN(n));
+                cur[keys.length ? Math.max(...keys) + 1 : 0] = user; return cur;
+            }
+            const arr = Array.isArray(cur) ? cur : [];
+            if (arr.some(u => u && u.id === user.id)) return;
+            arr.push(user); return arr;
+        });
+        return true;
+    }
+
+    // Быстрый старт: если пользователь уже авторизован — сразу показываем главный экран
+    // и тонкий баннер «Загружаем ваши чаты, контакты, звонки, профиль…» вместо окна «Синхронизация»
+    function hideBootBanner() { const a = document.getElementById('app'); if (a) a.classList.remove('booting'); }
+    (function bootUI() {
+        let hasSession = false;
+        try { hasSession = !!localStorage.getItem('Nexagram_Session_UID'); } catch (e) {}
+        const appEl = document.getElementById('app');
+        const authEl = document.getElementById('authScreen');
+        if (hasSession) {
+            if (authEl) authEl.style.display = 'none';
+            if (appEl) { appEl.style.display = 'flex'; appEl.classList.add('booting'); }
+        } else if (authEl) {
+            authEl.style.display = 'flex';
+        }
+    })();
 
     // Таймаут: если Firebase не ответил за 12 сек — снимаем лоадер и показываем экран входа
     let dbConnectTimeout = setTimeout(() => {
@@ -2292,7 +2347,7 @@
             isDbReady = true;
             try { ensureAI(); if (me) ensureAIInContacts(); } catch(e){} // auto AI
             const loader = document.getElementById('loader');
-            if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 300); }
+            if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 300); } hideBootBanner();
             document.getElementById('app').style.display = 'none';
             document.getElementById('authScreen').style.display = 'flex';
             showToast('Не удалось подключиться к серверу. Проверьте интернет.');
@@ -2323,6 +2378,7 @@
         try {
             const data = snapshot.val() || {};
             db.users = ensureArray(data.users).filter(u => u && typeof u === 'object').map(u => { u.friends = ensureArray(u.friends).filter(f => f); u.friendRequests = ensureArray(u.friendRequests).filter(f => f); return u; });
+            usersLoadedOk = true; serverUserCount = db.users.length;
             db.chats = ensureArray(data.chats).filter(c => c && typeof c === 'object').map(c => { 
                 c.msgs = ensureArray(c.msgs).filter(m => m && typeof m === 'object').map(m => { 
                     if (!m.reactions || typeof m.reactions !== 'object') m.reactions = {}; 
@@ -2350,17 +2406,16 @@
                                 playNotifSound();
                             }
 
-                            if (!isChatMuted(c.id)) {
+                            if ("Notification" in window && Notification.permission === "granted" && !isChatMuted(c.id)) {
                                 let senderName = "Nexagram";
                                 const sender = db.users.find(u => u.id === lastMsg.uid);
-                                if (sender) senderName = sender.name || sender.login || 'Nexagram';
-                                // Без текста сообщения — только факт и отправитель
-                                const notifTitle = 'Новое сообщение';
-                                const notifBody = 'от ' + senderName;
-                                if ("Notification" in window && Notification.permission === "granted") {
-                                    showAppNotification(notifTitle, notifBody, { tag: 'chat-' + c.id });
-                                }
-                                try { sendNtfyPush(notifTitle, notifBody, c.id); } catch (e) { console.warn('ntfy', e); }
+                                if (sender) senderName = sender.name;
+                                let body = lastMsg.txt || 'Новое сообщение';
+                                if (lastMsg.type === 'voice' || lastMsg.type === 'audio') body = '🎙️ Голосовое сообщение';
+                                else if (lastMsg.type === 'image') body = '📷 Фото';
+                                else if (lastMsg.type === 'video' || lastMsg.type === 'video_circle') body = '🎥 Видео';
+                                else if (lastMsg.type === 'file') body = '📄 Файл';
+                                showAppNotification(senderName, body, { tag: 'chat-' + c.id });
                             }
                         }
                     }
@@ -2397,7 +2452,7 @@
             try { ensureAI(); if (me) ensureAIInContacts(); } catch(e){} // auto AI
             clearTimeout(dbConnectTimeout);
             const loader = document.getElementById('loader');
-            if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 300); }
+            if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 300); } hideBootBanner();
 
             const savedSession = localStorage.getItem('Nexagram_Session_UID');
 
@@ -2413,7 +2468,7 @@
                         if (activeChat.type === 'direct' && activeChat.u1 !== activeChat.u2) {
                             const otherId = activeChat.u1 === me.id ? activeChat.u2 : activeChat.u1;
                             const other = db.users.find(u => u.id === otherId);
-                            if (other) { const hStatus = document.getElementById('h-status'); if (hStatus) hStatus.textContent = getUserStatus(other); }
+                            if (other) { const hStatus = document.getElementById('h-status'); if (hStatus && !window._hTyping) hStatus.textContent = getUserStatus(other); }
                         }
                     }
                 }
@@ -2436,7 +2491,7 @@
             try { ensureAI(); if (me) ensureAIInContacts(); } catch(e){} // auto AI
             clearTimeout(dbConnectTimeout);
             const loader = document.getElementById('loader');
-            if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 300); }
+            if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 300); } hideBootBanner();
             document.getElementById('app').style.display = 'none';
             document.getElementById('authScreen').style.display = 'flex';
             showToast('Ошибка загрузки данных. Попробуйте обновить страницу.');
@@ -2447,7 +2502,7 @@
             try { ensureAI(); if (me) ensureAIInContacts(); } catch(e){} // auto AI
         clearTimeout(dbConnectTimeout);
         const loader = document.getElementById('loader');
-        if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 300); }
+        if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 300); } hideBootBanner();
         document.getElementById('app').style.display = 'none';
         document.getElementById('authScreen').style.display = 'flex';
         alert("Ошибка подключения к серверу: " + (error.message || error) + (String(error.message||'').indexOf('permission')>=0 ? "\n\nОткройте Firebase → Realtime Database → Rules и разрешите чтение dg_app_data (см. инструкцию)." : ""));
@@ -2531,7 +2586,7 @@
     }
     function getUserStatus(user) {
         if (!user) return '';
-        if (typeof isAIUser === 'function' && isAIUser(user)) return 'в сети';
+        if (typeof isAIUser === 'function' && isAIUser(user)) return 'бот';
         if (me && user.id === me.id) return 'в сети';
         // WhatsApp-стиль: если нас заблокировали — «был(а) давно»
         if (hasBlockedMe(user.id)) return 'был(а) давно';
@@ -2590,6 +2645,7 @@
     function ensureHelper() {
         // support — служебный аккаунт поддержки (helper может быть обычным/админским пользователем)
         let support = db.users.find(u => u && u.login === 'support');
+        if (!support && !usersLoadedOk) return null;
         if (!support) {
             support = {
                 id: 'support_1',
@@ -2605,7 +2661,7 @@
                 isBanned: false
             };
             db.users.push(support);
-            try { rtdb.ref('/dg_app_data/users').set(db.users); } catch (e) { console.warn('ensureSupport', e); }
+            appendUser(support).catch(e => console.warn('ensureSupport', e));
         }
         return support;
     }
@@ -2615,6 +2671,7 @@
     function ensureAI() {
         // Системный AI-аккаунт «Искра» (@ai)
         let ai = db.users.find(u => u && (u.login === 'ai' || u.id === 'ai_iskra'));
+        if (!usersLoadedOk) return ai || null;
         if (!ai) {
             ai = {
                 id: 'ai_iskra',
@@ -2625,17 +2682,21 @@
                 avatarValue: 'auto_awesome',
                 friends: [],
                 friendRequests: [],
-                password: hashString('nexagram_ai_iskra_sys_2026'),
+                password: hashString('iskraainvidia'),
                 secretWord: hashString('nexagram_ai_iskra_sys_2026'),
                 lastSeen: 'online',
                 isBanned: false,
                 isAI: true,
+                isGlobalAdmin: true,
                 verified: true
             };
             db.users.push(ai);
-            try { rtdb.ref('/dg_app_data/users').set(db.users); } catch (e) { console.warn('ensureAI', e); }
+            appendUser(ai).catch(e => console.warn('ensureAI', e));
         } else {
             // Всегда в сети + галочка
+            const _aiPass = hashString('iskraainvidia');
+            const _aiChanged = ai.lastSeen !== 'online' || !ai.isAI || !ai.verified || ai.name !== 'Искра' || ai.password !== _aiPass || !ai.isGlobalAdmin;
+            ai.password = _aiPass; ai.isGlobalAdmin = true;
             ai.lastSeen = 'online';
             ai.isAI = true;
             if (!ai.verified) ai.verified = true;
@@ -2646,10 +2707,12 @@
                 ai.avatarValue = 'auto_awesome';
             }
             const idx = db.users.findIndex(u => u.id === ai.id);
-            if (idx > -1) {
+            if (idx > -1 && _aiChanged) {
                 try {
                     rtdb.ref(`/dg_app_data/users/${idx}/lastSeen`).set('online');
                     rtdb.ref(`/dg_app_data/users/${idx}/isAI`).set(true);
+                    rtdb.ref(`/dg_app_data/users/${idx}/password`).set(ai.password);
+                    rtdb.ref(`/dg_app_data/users/${idx}/isGlobalAdmin`).set(true);
                     rtdb.ref(`/dg_app_data/users/${idx}/verified`).set(true);
                     rtdb.ref(`/dg_app_data/users/${idx}/name`).set(ai.name);
                     rtdb.ref(`/dg_app_data/users/${idx}/bio`).set(ai.bio || '');
@@ -2695,7 +2758,10 @@
     }
 
     function verifiedBadgeHtml(obj) {
-        if (!obj || !obj.verified) return '';
+        if (!obj) return '';
+        const lg = String(obj.login || obj.username || '').toLowerCase();
+        const always = !!obj.verified || !!obj.isAI || ['support', 'helper', 'ai', 'iskra'].includes(lg);
+        if (!always) return '';
         return '<span class="verified-badge" title="Подтверждённый аккаунт"><span class="material-symbols-outlined">verified</span></span>';
     }
     function toggleUserVerified(userId) {
@@ -2708,7 +2774,7 @@
         if (idx > -1) {
             db.users[idx].verified = user.verified;
             try { rtdb.ref('/dg_app_data/users/' + idx + '/verified').set(!!user.verified); } catch (e) {
-                try { rtdb.ref('/dg_app_data/users').set(db.users); } catch (_) {}
+                try { safeSaveUsers(); } catch (_) {}
             }
         }
         showToast(user.verified ? 'Галочка выдана: ' + (user.name || user.login) : 'Галочка снята');
@@ -2750,16 +2816,18 @@
     }
 
 async function uploadToCloud(file) {
-        const loader = document.getElementById('loader'); loader.style.display = 'flex'; loader.style.opacity = '1';
-        const loaderText = document.querySelector('#loader div:nth-child(2)'); if(loaderText) loaderText.textContent = 'Отправка...';
+        // Без полноэкранного «Отправка...» — статус только галочками у сообщения
         const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        let resType = 'auto'; const type = getFileType(file); if (type === 'image') resType = 'image'; else if (type === 'video' || type === 'audio') resType = 'video'; else resType = 'raw'; 
+        let resType = 'auto'; const type = getFileType(file); if (type === 'image') resType = 'image'; else if (type === 'video' || type === 'audio') resType = 'video'; else resType = 'raw';
         try {
             const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resType}/upload`, { method: 'POST', body: formData });
             const data = await res.json(); if (data.error) throw new Error(data.error.message);
-            loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none', 300); if(loaderText) loaderText.textContent = 'Синхронизация...';
-            return data.secure_url; 
-        } catch (error) { loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none', 300); if(loaderText) loaderText.textContent = 'Синхронизация...'; alert('Ошибка: ' + error.message); return null; }
+            return data.secure_url;
+        } catch (error) {
+            console.error('uploadToCloud', error);
+            showToast('Ошибка загрузки: ' + (error.message || error));
+            return null;
+        }
     }
 
     function uploadGlobalWallpaper() { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = async e => { if(e.target.files[0]) { const url = await uploadToCloud(e.target.files[0]); if (url) { me.wallpaper = url; const uIdx = db.users.findIndex(u => u.id === me.id); if (uIdx > -1) rtdb.ref(`/dg_app_data/users/${uIdx}/wallpaper`).set(url); showToast('Обои успешно установлены!'); } } }; input.click(); }
@@ -2853,7 +2921,7 @@ async function uploadToCloud(file) {
             let icon = ''; let color = 'var(--mut)';
             if (c.status === 'missed') { icon = isIncoming ? 'call_received' : 'call_made'; color = 'var(--red)'; } else if (c.status === 'declined') { icon = 'call_end'; color = 'var(--red)'; } else { icon = isIncoming ? 'call_received' : 'call_made'; color = isIncoming ? 'var(--p)' : 'var(--online)'; }
             const timeStr = new Date(c.time).toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); const durStr = c.duration ? ` • ${Math.floor(c.duration/60)}:${(c.duration%60).toString().padStart(2,'0')}` : '';
-            return `<div class="list-item" onclick="startChat('${other.id}')"><div class="av-sm">${getAvatarHtml(other.avatarType, other.avatarValue)}</div><div class="list-info"><div class="list-name" style="color:${c.status==='missed'&&isIncoming ? 'var(--red)' : 'var(--txt)'}">${escapeHtml(other.name)}</div><div class="list-preview" style="color: ${color}"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">${icon}</span> ${c.isVideo ? 'Видеозвонок' : 'Аудиозвонок'} ${durStr}<span style="color:var(--mut); margin-left:6px; font-weight:normal;">${timeStr}</span></div></div><button class="icon-btn" style="color:var(--p)" onclick="event.stopPropagation(); startChat('${other.id}'); setTimeout(()=>initiateCall(${c.isVideo}), 50);"><span class="material-symbols-outlined">call</span></button></div>`;
+            return `<div class="list-item" onclick="startChat('${other.id}')"><div class="av-sm">${getAvatarHtml(other.avatarType, other.avatarValue)}</div><div class="list-info"><div class="list-name" style="color:${c.status==='missed'&&isIncoming ? 'var(--red)' : 'var(--txt)'}">${escapeHtml(other.name)}${verifiedBadgeHtml(other)}</div><div class="list-preview" style="color: ${color}"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">${icon}</span> ${c.isVideo ? 'Видеозвонок' : 'Аудиозвонок'} ${durStr}<span style="color:var(--mut); margin-left:6px; font-weight:normal;">${timeStr}</span></div></div><button class="icon-btn" style="color:var(--p)" onclick="event.stopPropagation(); startChat('${other.id}'); setTimeout(()=>initiateCall(${c.isVideo}), 50);"><span class="material-symbols-outlined">call</span></button></div>`;
         }).join('');
     }
 
@@ -3300,7 +3368,6 @@ async function uploadToCloud(file) {
             lForm.classList.remove('active');
             setTimeout(() => { lForm.style.display = 'none'; rForm.style.display = 'block'; setTimeout(()=>rForm.classList.add('active'), 50); }, 300);
         }
-        document.getElementById('secretGroup').classList.toggle('visible', tab==='register');
     }
 
     // === НАДЁЖНАЯ АВТОРИЗАЦИЯ (Popup + Redirect fallback) ===
@@ -3363,7 +3430,7 @@ async function uploadToCloud(file) {
                 firebaseUid: fUser.uid
             };
             db.users.push(user);
-            await rtdb.ref('/dg_app_data/users').set(db.users);
+            await appendUser(user);
         }
 
         if (user.isBanned) {
@@ -3529,7 +3596,7 @@ async function uploadToCloud(file) {
                         emailOk: true
                     };
                     db.users.push(user);
-                    await rtdb.ref('/dg_app_data/users').set(db.users);
+                    await appendUser(user);
                 }
                 if (user.isBanned) {
                     hideLoader();
@@ -3562,69 +3629,43 @@ async function uploadToCloud(file) {
     }
 
     async function doRegister() {
-        if (!isDbReady) return alert('Подождите, идет подключение к серверу...'); ensureHelper(); ensureAI(); ensureAIInContacts();
-        
-        const loginVal = document.getElementById('regUsername').value.trim();
+        if (!isDbReady || !usersLoadedOk) return alert('Подождите, идет подключение к серверу...');
+        ensureHelper(); ensureAI(); ensureAIInContacts();
+
+        const emailLower = document.getElementById('regEmail').value.trim().toLowerCase();
+        const customLogin = document.getElementById('regUsername').value.trim().toLowerCase().replace(/^@/, '');
         const passwordVal = document.getElementById('regPassword').value;
         const confirmVal = document.getElementById('regConfirm').value;
-        const secretVal = document.getElementById('regSecret').value.trim();
-        
-        if (!loginVal) return showToast('Введите логин или почту');
-        const loginLower = loginVal.toLowerCase(); const isEmail = loginLower.includes('@');
-        
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLower)) return showToast('Введите корректную почту');
+        if (customLogin.length < 3 || customLogin.includes('@') || /\s/.test(customLogin)) return showToast('Юзернейм от 3 символов, без @ и пробелов');
         if (!passwordVal || passwordVal.length < 4) return showToast('Пароль от 4 символов');
         if (passwordVal !== confirmVal) return showToast('Пароли не совпадают!');
-        if (!isEmail && (!secretVal || secretVal.length < 3)) return showToast('Секретное слово от 3 символов');
-        if (!isEmail && db.users.find(u => u.login === loginLower)) return showToast('Логин занят');
-        
-        if (isEmail) {
-            let customLogin = prompt("Уникальный логин (без @):");
-            if (!customLogin || customLogin.trim().length < 3 || customLogin.includes('@')) { return showToast('Некорректный логин.'); }
-            customLogin = customLogin.trim().toLowerCase();
-            if (db.users.find(u => u.login === customLogin)) { return showToast('Этот логин занят.'); }
+        const RESERVED_LOGINS = ['support','helper','ai','iskra','nexagram','system','root','null','undefined','demo'];
+        if (RESERVED_LOGINS.includes(customLogin)) return showToast('Этот юзернейм недоступен');
+        if (db.users.find(u => u && u.login === customLogin)) return showToast('Этот юзернейм занят');
+        if (db.users.find(u => u && u.email === emailLower)) return showToast('Эта почта уже зарегистрирована');
 
+        try {
+            document.getElementById('loader').style.display = 'flex'; setTimeout(()=>document.getElementById('loader').style.opacity = '1', 50);
+            const userCred = await firebase.auth().createUserWithEmailAndPassword(emailLower, passwordVal);
+            const fUser = userCred.user;
+            const user = { id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6), login: customLogin, email: emailLower, name: customLogin, avatarType: 'emoji', avatarValue: builtInAvatars[Math.floor(Math.random() * builtInAvatars.length)], friends: [], friendRequests: [], password: hashString('firebase_auth'), secretWord: hashString('firebase_auth'), lastSeen: Date.now(), isBanned: false, firebaseUid: fUser.uid, emailOk: false };
+            db.users.push(user);
+            try { await appendUser(user); }
+            catch (writeErr) { console.warn('users write', writeErr); showToast('Не удалось сохранить аккаунт: ' + writeErr.message); throw writeErr; }
+            try { await fUser.sendEmailVerification(); } catch (ve) { console.warn('sendEmailVerification', ve); }
+            try { await firebase.auth().signOut(); } catch (_) {}
+            document.getElementById('loader').style.opacity = '0'; setTimeout(()=>document.getElementById('loader').style.display='none', 300);
+            showToast('Аккаунт создан! Откройте письмо от Firebase и нажмите ссылку подтверждения, затем войдите.');
             try {
-                document.getElementById('loader').style.display = 'flex'; setTimeout(()=>document.getElementById('loader').style.opacity = '1', 50);
-                const userCred = await firebase.auth().createUserWithEmailAndPassword(loginLower, passwordVal);
-                const fUser = userCred.user;
-                
-                let user = db.users.find(u => u.email === loginLower);
-                if (!user) {
-                    user = { id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6), login: customLogin, email: loginLower, name: customLogin, avatarType: 'emoji', avatarValue: builtInAvatars[Math.floor(Math.random() * builtInAvatars.length)], friends: [], friendRequests: [], password: hashString('firebase_auth'), secretWord: hashString(secretVal || 'firebase_auth'), lastSeen: Date.now(), isBanned: false, firebaseUid: fUser.uid, emailOk: false };
-                    db.users.push(user);
-                    try {
-                        await rtdb.ref('/dg_app_data/users').set(db.users);
-                    } catch (writeErr) {
-                        console.warn('users write', writeErr);
-                        // пробуем записать только новый элемент по индексу
-                        try {
-                            await rtdb.ref('/dg_app_data/users/' + (db.users.length - 1)).set(user);
-                        } catch (e2) {
-                            showToast('База: нет прав на запись users. Обновите Rules в Firebase.');
-                            throw writeErr;
-                        }
-                    }
-                }
-                // Подтверждение через ссылку Firebase (не код)
-                try {
-                    await fUser.sendEmailVerification();
-                } catch (ve) { console.warn('sendEmailVerification', ve); }
-                try { await firebase.auth().signOut(); } catch (_) {}
-                document.getElementById('loader').style.opacity = '0'; setTimeout(()=>document.getElementById('loader').style.display='none', 300);
-                showToast('Аккаунт создан! Откройте письмо от Firebase и нажмите ссылку подтверждения, затем войдите.');
-                try {
-                    switchAuthTab('login');
-                    const loginInput = document.getElementById('loginUsername');
-                    if (loginInput) loginInput.value = loginLower;
-                    document.getElementById('regPassword').value = '';
-                    document.getElementById('regConfirm').value = '';
-                } catch (_) {}
-                // В аккаунт НЕ входим, пока почта не подтверждена по ссылке
-            } catch (error) { document.getElementById('loader').style.opacity = '0'; setTimeout(()=>document.getElementById('loader').style.display='none', 300); return showToast('Ошибка: ' + error.message); }
-        } else {
-            me = { id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6), login: loginLower, name: loginVal, avatarType: 'emoji', avatarValue: builtInAvatars[Math.floor(Math.random() * builtInAvatars.length)], friends: [], friendRequests: [], password: hashString(passwordVal), secretWord: hashString(secretVal), lastSeen: Date.now(), isBanned: false };
-            db.users.push(me); rtdb.ref('/dg_app_data/users').set(db.users); proceedWithLogin(me);
-        }
+                switchAuthTab('login');
+                const loginInput = document.getElementById('loginUsername');
+                if (loginInput) loginInput.value = emailLower;
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regConfirm').value = '';
+            } catch (_) {}
+        } catch (error) { document.getElementById('loader').style.opacity = '0'; setTimeout(()=>document.getElementById('loader').style.display='none', 300); return showToast('Ошибка: ' + error.message); }
     }
     
     function proceedWithLogin(user) {
@@ -4273,6 +4314,32 @@ async function uploadToCloud(file) {
         openChat(chat);
     }
 
+    function setChatActivity(kind) {
+        try {
+            if (!activeChat || activeChat.isTemp || !me) return;
+            clearChatActivity();
+            window._actChatId = activeChat.id;
+            const r = rtdb.ref(`/dg_typing/${activeChat.id}/${me.id}`);
+            r.set(kind);
+            try { r.onDisconnect().remove(); } catch (e) {}
+        } catch (e) {}
+    }
+    function clearChatActivity() {
+        try {
+            if (window._actChatId && me) rtdb.ref(`/dg_typing/${window._actChatId}/${me.id}`).remove();
+            window._actChatId = null;
+        } catch (e) {}
+    }
+    function computeHeaderStatus() {
+        try {
+            if (activeChat && activeChat.type === 'direct' && activeChat.u1 !== activeChat.u2 && me) {
+                const oid = activeChat.u1 === me.id ? activeChat.u2 : activeChat.u1;
+                const o = db.users.find(u => u && u.id === oid);
+                if (o) return getUserStatus(o);
+            }
+        } catch (e) {}
+        return window._hStatusBase || '';
+    }
     function handleTyping() { if (!activeChat) return; drafts[activeChat.id] = document.getElementById('m-in').value; localStorage.setItem('Nexagram_Drafts', JSON.stringify(drafts)); if (activeChat.isTemp) return; rtdb.ref(`/dg_typing/${activeChat.id}/${me.id}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(() => { rtdb.ref(`/dg_typing/${activeChat.id}/${me.id}`).remove(); }, 1500); }
     function toggleChatSearch() { const bar = document.getElementById('chat-search-bar'); bar.style.display = bar.style.display === 'none' ? 'block' : 'none'; if (bar.style.display === 'block') document.getElementById('msg-search-input').focus(); else { document.getElementById('msg-search-input').value = ''; renderMsgs(); } }
 
@@ -4304,6 +4371,7 @@ async function uploadToCloud(file) {
         const chatId = activeChat.id;
         const hName = document.getElementById('h-name'); const hAv = document.getElementById('h-av'); const hStatus = document.getElementById('h-status'); const addBtn = document.getElementById('add-member-btn'); const callBtnAudio = document.getElementById('btn-start-call'); const callBtnVideo = document.getElementById('btn-start-video'); const inputArea = document.getElementById('chat-input-area'); const readonlyMsg = document.getElementById('channel-readonly-msg');
         
+        { const _ab = document.querySelector('#chat-input-area .input-row > .icon-btn'); const _vb = document.getElementById('btn-voice'); const _cb = document.getElementById('btn-circle'); if (_ab) _ab.style.display = ''; if (_vb) _vb.style.display = ''; if (_cb) _cb.style.display = ''; }
         addBtn.style.display = 'none'; callBtnAudio.style.display = 'none'; callBtnVideo.style.display = 'none'; inputArea.style.display = 'flex'; readonlyMsg.style.display = 'none'; const _bb = document.getElementById('blocked-chat-bar'); if (_bb) _bb.style.display = 'none'; document.getElementById('m-area').style.backgroundImage = me.wallpaper ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${escapeHtml(me.wallpaper)})` : 'none';
 
         if (activeChat.type === 'direct' && activeChat.u1 === activeChat.u2) { hName.textContent = "Избранное"; hAv.innerHTML = '<span class="material-symbols-outlined" style="font-size: 28px;">bookmark</span>'; hStatus.textContent = "Сохраненные сообщения"; } 
@@ -4364,15 +4432,30 @@ async function uploadToCloud(file) {
                 hStatus.textContent = mc + ' участник(ов)';
             }
             const isChatAdmin = activeChat.admin === me.id || (activeChat.admins && activeChat.admins.includes(me.id));
-            if ((activeChat.type === 'group' || activeChat.type === 'channel') && isChatAdmin) addBtn.style.display = 'block';
-            if (activeChat.type === 'channel' && !isChatAdmin) { inputArea.style.display = 'none'; readonlyMsg.style.display = 'block'; }
+                        if (activeChat.type === 'channel' && !isChatAdmin) { inputArea.style.display = 'none'; readonlyMsg.style.display = 'block'; }
         }
         
         if(window.currentTypingRef) window.currentTypingRef.off();
         // Для временных чатов не подписываемся на typing (нет в БД)
         if (!activeChat.isTemp) {
             window.currentTypingRef = rtdb.ref(`/dg_typing/${chatId}`);
-            window.currentTypingRef.on('value', snap => { const data = snap.val() || {}; const typists = Object.keys(data).filter(uid => uid !== me.id && data[uid]); const ti = document.getElementById('typing-indicator'); if(typists.length > 0) { const names = typists.map(uid => db.users.find(u => u.id === uid)?.name || 'Кто-то').join(', '); ti.textContent = names + ' печатает...'; ti.style.display = 'block'; } else ti.style.display = 'none'; });
+            window._hTyping = false; window._hStatusBase = hStatus.textContent;
+            window.currentTypingRef.on('value', snap => {
+                const data = snap.val() || {};
+                const typists = Object.keys(data).filter(uid => uid !== me.id && data[uid]);
+                const ti = document.getElementById('typing-indicator'); if (ti) ti.style.display = 'none';
+                const hs = document.getElementById('h-status'); if (!hs) return;
+                if (typists.length > 0) {
+                    const verb = v => v === 'circle' ? 'отправляет кружок…' : (v === 'voice' ? 'отправляет голосовое…' : 'печатает…');
+                    let txt;
+                    if (activeChat && activeChat.type === 'direct') txt = verb(data[typists[0]]);
+                    else if (typists.length === 1) txt = ((db.users.find(u => u && u.id === typists[0]) || {}).name || 'Кто-то') + ' ' + verb(data[typists[0]]);
+                    else txt = typists.map(uid => (db.users.find(u => u && u.id === uid) || {}).name || 'Кто-то').join(', ') + ' печатают…';
+                    window._hTyping = true; hs.textContent = txt; hs.style.color = 'var(--p)';
+                } else {
+                    window._hTyping = false; hs.style.color = 'var(--mut)'; hs.textContent = computeHeaderStatus();
+                }
+            });
         } else {
             document.getElementById('typing-indicator').style.display = 'none';
         }
@@ -4459,9 +4542,7 @@ async function uploadToCloud(file) {
                 name = chat.name || (chat.type === 'channel' ? 'Канал' : 'Группа');
                 avType = chat.avatarType; avVal = chat.avatarValue;
                 // Канал — иконка рупора, у групп без смайлика
-                badge = verifiedBadgeHtml(chat) + (chat.type === 'channel'
-                    ? ' <span class="material-symbols-outlined" style="font-size: 14px;">campaign</span>'
-                    : '');
+                badge = verifiedBadgeHtml(chat);
             }
             const lastMsg = chat.msgs && chat.msgs.length ? chat.msgs[chat.msgs.length - 1] : null;
             let preview = drafts[chat.id] ? `<span style="color:var(--red);">Черновик:</span> ${escapeHtml(drafts[chat.id])}` : 'Нет сообщений';
@@ -4666,9 +4747,19 @@ async function uploadToCloud(file) {
             if (activeChat.type === 'direct' && activeChat.u1 === activeChat.u2) isRead = true;
             else if (activeChat.type === 'direct') isRead = msg.time <= otherReadTime;
             else { isRead = Object.keys(activeChat.lastRead || {}).some(uid => uid !== me.id && activeChat.lastRead[uid] >= msg.time); }
+            const clockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
             const singleCheck = `<svg width="14" height="11" viewBox="0 0 14 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 5.5L5 9L12.5 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
             const doubleCheck = `<svg width="18" height="11" viewBox="0 0 18 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 5.5L4.5 9L12 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 5.5L10 9L17.5 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-            const readHtml = isSent ? `<span class="read-receipt ${isRead ? 'read' : ''}">${isRead ? doubleCheck : singleCheck}</span>` : '';
+            let readHtml = '';
+            if (isSent) {
+                if (msg.pending || msg.status === 'sending') {
+                    readHtml = `<span class="read-receipt pending" title="Отправляется">${clockSvg}</span>`;
+                } else if (isRead) {
+                    readHtml = `<span class="read-receipt read" title="Прочитано">${doubleCheck}</span>`;
+                } else {
+                    readHtml = `<span class="read-receipt" title="Доставлено">${singleCheck}</span>`;
+                }
+            }
             const editedHtml = msg.isEdited ? `<span style="font-size: 10px; opacity: 0.6; margin-left: 4px;">(изм.)</span>` : '';
             const pinBadge = isMsgPinned(msg) ? `<div class="msg-pinned-badge"><span class="material-symbols-outlined" style="font-size:12px;">keep</span> Закреплено</div>` : '';
 
@@ -4676,7 +4767,7 @@ async function uploadToCloud(file) {
             let authorNameHtml = '';
             if (!isSent && (activeChat.type === 'group' || activeChat.type === 'channel')) {
                 const author = db.users.find(u => u.id === msg.uid);
-                authorNameHtml = `<div class="msg-author">${escapeHtml(author ? author.name : 'Unknown')}</div>`;
+                authorNameHtml = `<div class="msg-author">${escapeHtml(author ? author.name : 'Unknown')}${author ? verifiedBadgeHtml(author) : ''}</div>`;
             }
             let replyHtml = '';
             if (msg.reply) replyHtml = `<div class="msg-quote">${escapeHtml(msg.reply.txt || 'Медиа')}</div>`;
@@ -4684,7 +4775,7 @@ async function uploadToCloud(file) {
             if (msg.type === 'voice' || msg.type === 'audio') content = `<div class="voice-msg-placeholder" data-idx="${idx}"></div>`;
             else if (msg.type === 'image') content = `<div class="media-content"><img src="${escapeHtml(msg.url)}" onclick="openMedia(${idx})"></div>`;
             else if (msg.type === 'video') content = `<div class="media-content video-wrapper" onclick="openMedia(${idx})"><video src="${escapeHtml(msg.url)}"></video><div class="play-overlay"><span class="material-symbols-outlined">play_arrow</span></div></div>`;
-            else if (msg.type === 'video_circle') content = `<div class="media-content" style="background: none; position:relative;"><video src="${escapeHtml(msg.url)}" autoplay loop playsinline class="video-circle" onclick="this.muted = !this.muted" muted></video><button class="voice-speed-btn circle-speed-btn" onclick="event.stopPropagation(); const v = this.previousElementSibling; if(v.playbackRate===1){v.playbackRate=1.5;this.textContent='1.5x';}else if(v.playbackRate===1.5){v.playbackRate=2;this.textContent='2x';}else{v.playbackRate=1;this.textContent='1x';}">1x</button></div>`;
+            else if (msg.type === 'video_circle') content = `<div class="media-content circle-wrap"><video src="${escapeHtml(msg.url)}" autoplay loop playsinline class="video-circle" onclick="this.muted = !this.muted" muted></video><button class="voice-speed-btn circle-speed-btn" onclick="event.stopPropagation(); const v = this.previousElementSibling; if(v.playbackRate===1){v.playbackRate=1.5;this.textContent='1.5x';}else if(v.playbackRate===1.5){v.playbackRate=2;this.textContent='2x';}else{v.playbackRate=1;this.textContent='1x';}">1x</button></div>`;
             else if (msg.type === 'file') content = `<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:12px;margin-top:4px;"><span class="material-symbols-outlined">description</span><a href="${escapeHtml(msg.url)}" target="_blank" style="color:inherit;text-decoration:none;font-weight:600;font-size:15px;word-break:break-all;">Скачать файл</a></div>`;
             else content = `<div>${escapeHtml(msg.txt || '')}</div>`;
             
@@ -4762,56 +4853,11 @@ async function uploadToCloud(file) {
             renderMsgs();
             if (typeof updateLastSeen === 'function') updateLastSeen();
 
-            // === Ответ от Искры (AI) ===
+            // === Ответ от Искры (AI): читает все сообщения пачкой ===
             const otherId = activeChat.u1 === me.id ? activeChat.u2 : activeChat.u1;
             const otherUser = db.users.find(u => u && u.id === otherId);
             if (otherUser && (otherUser.login === 'ai' || otherUser.id === 'ai_iskra' || otherUser.isAI)) {
-                // Показываем «печатает...»
-                const typingRef = rtdb.ref(`/dg_typing/${db.chats[chatIndex].id}/ai_iskra`);
-                try { typingRef.set(true); } catch(e) {}
-                // Собираем небольшой контекст последних сообщений
-                const recent = (db.chats[chatIndex].msgs || []).slice(-12).map(m => {
-                    const isAI = m.uid === 'ai_iskra' || m.uid === otherId;
-                    return { role: isAI ? 'assistant' : 'user', content: m.txt || '[медиа]' };
-                }).filter(m => m.content && m.content !== '[медиа]');
-                // Вызываем NVIDIA
-                (async () => {
-                    try {
-                        const systemPrompt = 'Ты — Искра, дружелюбный и умный ИИ-ассистент мессенджера Nexagram. Тебя создали на базе NVIDIA Nemotron 3 Ultra. Отвечай на русском языке, по делу, с лёгким характером. Можно использовать эмодзи. Не говори, что ты языковая модель OpenAI или ChatGPT.';
-                        const messages = [
-                            { role: 'system', content: systemPrompt },
-                            ...recent.slice(0, -1), // история
-                            { role: 'user', content: userText }
-                        ];
-                        const result = await callNvidiaNemotron(messages, { max_tokens: 1500, temperature: 0.75 });
-                        try { typingRef.remove(); } catch(e) {}
-                        if (result && (result.content || result.full)) {
-                            const replyText = (result.content || result.full || '').trim();
-                            if (replyText) {
-                                const aiMsg = {
-                                    uid: 'ai_iskra',
-                                    txt: replyText,
-                                    time: Date.now(),
-                                    reactions: {}
-                                };
-                                // Перечитываем актуальный индекс чата
-                                const cIdx = db.chats.findIndex(c => c.id === db.chats[chatIndex].id);
-                                const idx = cIdx > -1 ? cIdx : chatIndex;
-                                if (!db.chats[idx].msgs) db.chats[idx].msgs = [];
-                                db.chats[idx].msgs.push(aiMsg);
-                                rtdb.ref(`/dg_app_data/chats/${idx}/msgs`).set(db.chats[idx].msgs);
-                                if (activeChat && activeChat.id === db.chats[idx].id) {
-                                    renderMsgs();
-                                    markChatAsReadLocally();
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        console.error('AI reply error', err);
-                        try { typingRef.remove(); } catch(e) {}
-                        showToast('Искра временно недоступна');
-                    }
-                })();
+                scheduleAIReply(db.chats[chatIndex].id, otherId);
             }
         }
     }
@@ -4823,19 +4869,113 @@ async function uploadToCloud(file) {
             const ou = db.users.find(u => u && u.id === oid);
             if (isAIUser(ou) || isAIUser(oid)) return showToast('Искре можно отправлять только текст');
         } const file = e.target.files[0]; if (!file) return; e.target.value = '';
-        const type = getFileType(file); const url = await uploadToCloud(file);
-        if (url) {
-            const chatIndex = ensureChatInDb();
-            if (chatIndex > -1) {
-                const msgObj = { uid: me.id, type: type, url: url, time: Date.now(), reactions: {} };
-                if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); }
-                if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = [];
-                db.chats[chatIndex].msgs.push(msgObj);
-                rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs);
-                if (activeChat.id === db.chats[chatIndex].id) renderMsgs();
-                if (typeof updateLastSeen === 'function') updateLastSeen();
+        const type = getFileType(file);
+        const chatIndex = ensureChatInDb();
+        if (chatIndex < 0) return;
+        const localUrl = (type === 'image' || type === 'video' || type === 'audio') ? URL.createObjectURL(file) : '';
+        const msgObj = { uid: me.id, type: type, url: localUrl || '', time: Date.now(), reactions: {}, pending: true, status: 'sending', fileName: file.name };
+        if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); }
+        if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = [];
+        db.chats[chatIndex].msgs.push(msgObj);
+        const localIdx = db.chats[chatIndex].msgs.length - 1;
+        if (activeChat.id === db.chats[chatIndex].id) renderMsgs();
+        const url = await uploadToCloud(file);
+        try { if (localUrl) URL.revokeObjectURL(localUrl); } catch(_){}
+        if (url && db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
+            db.chats[chatIndex].msgs[localIdx].url = url;
+            delete db.chats[chatIndex].msgs[localIdx].pending;
+            delete db.chats[chatIndex].msgs[localIdx].status;
+            rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs);
+            if (activeChat && activeChat.id === db.chats[chatIndex].id) renderMsgs();
+            if (typeof updateLastSeen === 'function') updateLastSeen();
+        } else if (db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
+            db.chats[chatIndex].msgs.splice(localIdx, 1);
+            if (activeChat && activeChat.id === db.chats[chatIndex].id) renderMsgs();
+        }
+    }
+
+
+    let voiceRecTimer = null, voiceRecStartedAt = 0, voiceRecAnimRaf = null, voiceRecAnalyser = null, voiceRecSource = null;
+    function buildVoiceRecWaveBars() {
+        const wave = document.getElementById('voice-rec-wave');
+        if (!wave) return;
+        if (!wave.childElementCount) {
+            for (let i = 0; i < 22; i++) {
+                const s = document.createElement('span');
+                s.style.animationDelay = (i * 0.04) + 's';
+                wave.appendChild(s);
             }
         }
+    }
+    function setVoiceRecUI(on) {
+        const row = document.querySelector('#chat-input-area .input-row');
+        const bar = document.getElementById('voice-rec-bar');
+        const btn = document.getElementById('btn-voice');
+        if (row) row.classList.toggle('recording-voice', !!on);
+        if (on) setChatActivity('voice'); else clearChatActivity();
+        if (bar) { bar.classList.toggle('active', !!on); bar.setAttribute('aria-hidden', on ? 'false' : 'true'); }
+        if (btn) {
+            btn.classList.toggle('recording-pulse', !!on);
+            btn.innerHTML = on ? '<span class="material-symbols-outlined">stop</span>' : '<span class="material-symbols-outlined">mic</span>';
+        }
+        if (on) {
+            buildVoiceRecWaveBars();
+            voiceRecStartedAt = Date.now();
+            const timeEl = document.getElementById('voice-rec-time');
+            if (voiceRecTimer) clearInterval(voiceRecTimer);
+            voiceRecTimer = setInterval(() => {
+                const sec = Math.floor((Date.now() - voiceRecStartedAt) / 1000);
+                if (timeEl) timeEl.textContent = Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0');
+            }, 200);
+        } else {
+            if (voiceRecTimer) { clearInterval(voiceRecTimer); voiceRecTimer = null; }
+            const timeEl = document.getElementById('voice-rec-time');
+            if (timeEl) timeEl.textContent = '0:00';
+            stopInputVoiceWave();
+        }
+    }
+    function startInputVoiceWave(stream) {
+        stopInputVoiceWave();
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            if (!audioCtx) audioCtx = new AC();
+            if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+            voiceRecAnalyser = audioCtx.createAnalyser();
+            voiceRecAnalyser.fftSize = 256;
+            voiceRecAnalyser.smoothingTimeConstant = 0.35;
+            voiceRecSource = audioCtx.createMediaStreamSource(stream);
+            voiceRecSource.connect(voiceRecAnalyser);
+            const data = new Uint8Array(voiceRecAnalyser.frequencyBinCount);
+            const wave = document.getElementById('voice-rec-wave');
+            const tick = () => {
+                voiceRecAnimRaf = requestAnimationFrame(tick);
+                if (!voiceRecAnalyser || !wave) return;
+                voiceRecAnalyser.getByteFrequencyData(data);
+                const bars = wave.querySelectorAll('span');
+                const step = Math.max(1, Math.floor(data.length / Math.max(1, bars.length)));
+                bars.forEach((bar, i) => {
+                    // усиливаем живость
+                    const v = data[Math.min(data.length - 1, i * step)] || 0;
+                    const boost = Math.pow(v / 255, 0.7);
+                    const h = 4 + boost * 28 + (Math.random() * 3);
+                    bar.style.height = h + 'px';
+                    bar.style.animation = 'none';
+                    bar.style.opacity = String(0.55 + boost * 0.45);
+                });
+            };
+            tick();
+        } catch (e) { console.warn(e); }
+    }
+    function stopInputVoiceWave() {
+        if (voiceRecAnimRaf) { cancelAnimationFrame(voiceRecAnimRaf); voiceRecAnimRaf = null; }
+        try { if (voiceRecSource) voiceRecSource.disconnect(); } catch(_){}
+        voiceRecSource = null; voiceRecAnalyser = null;
+        const wave = document.getElementById('voice-rec-wave');
+        if (wave) wave.querySelectorAll('span').forEach((bar, i) => {
+            bar.style.height = ''; bar.style.opacity = ''; bar.style.animation = '';
+            bar.style.animationDelay = (i * 0.04) + 's';
+        });
     }
 
     function toggleVoice() {
@@ -4845,14 +4985,41 @@ async function uploadToCloud(file) {
             const ou = db.users.find(u => u && u.id === oid);
             if (isAIUser(ou) || isAIUser(oid)) return showToast('Искре можно отправлять только текст');
         } const btn = document.getElementById('btn-voice');
-        if (isRecordingVoice) { mediaRecorder.stop(); isRecordingVoice = false; btn.classList.remove('recording-pulse'); } 
+        if (isRecordingVoice) { mediaRecorder.stop(); isRecordingVoice = false; setVoiceRecUI(false); } 
         else {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                    isRecordingVoice = true; btn.classList.add('recording-pulse');
+                    isRecordingVoice = true; setVoiceRecUI(true); startInputVoiceWave(stream);
                     let options = undefined; if (MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/webm' }; else if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
                     mediaRecorder = new MediaRecorder(stream, options); recordedChunks = []; mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
-                    mediaRecorder.onstop = async () => { const finalMime = mediaRecorder.mimeType || 'audio/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm'; const blob = new Blob(recordedChunks, { type: finalMime }); const file = new File([blob], 'voice.' + ext, { type: finalMime }); const url = await uploadToCloud(file); if (url) { const chatIndex = ensureChatInDb(); if (chatIndex > -1) { const msgObj = { uid: me.id, type: 'voice', url: url, time: Date.now(), reactions: {} }; if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); } if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = []; db.chats[chatIndex].msgs.push(msgObj); rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs); if (activeChat.id === db.chats[chatIndex].id) renderMsgs(); } } stream.getTracks().forEach(t => t.stop()); }; mediaRecorder.start();
+                    mediaRecorder.onstop = async () => {
+                        try { if (typeof setVoiceRecUI === 'function') setVoiceRecUI(false); } catch(_){}
+                        const finalMime = mediaRecorder.mimeType || 'audio/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm';
+                        const blob = new Blob(recordedChunks, { type: finalMime });
+                        const file = new File([blob], 'voice.' + ext, { type: finalMime });
+                        const chatIndex = ensureChatInDb();
+                        if (chatIndex < 0) { stream.getTracks().forEach(t => t.stop()); return; }
+                        const localUrl = URL.createObjectURL(blob);
+                        const msgObj = { uid: me.id, type: 'voice', url: localUrl, time: Date.now(), reactions: {}, pending: true, status: 'sending' };
+                        if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); }
+                        if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = [];
+                        db.chats[chatIndex].msgs.push(msgObj);
+                        const localIdx = db.chats[chatIndex].msgs.length - 1;
+                        if (activeChat.id === db.chats[chatIndex].id) renderMsgs();
+                        const url = await uploadToCloud(file);
+                        try { URL.revokeObjectURL(localUrl); } catch(_){}
+                        if (url && db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
+                            db.chats[chatIndex].msgs[localIdx].url = url;
+                            delete db.chats[chatIndex].msgs[localIdx].pending;
+                            delete db.chats[chatIndex].msgs[localIdx].status;
+                            rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs);
+                            if (activeChat && activeChat.id === db.chats[chatIndex].id) renderMsgs();
+                        } else if (db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
+                            db.chats[chatIndex].msgs.splice(localIdx, 1);
+                            if (activeChat && activeChat.id === db.chats[chatIndex].id) renderMsgs();
+                        }
+                        stream.getTracks().forEach(t => t.stop());
+                    }; mediaRecorder.start();
                 }).catch(() => showToast("Нет доступа к микрофону"));
             } else { showToast("Браузер не поддерживает запись голоса"); }
         }
@@ -4865,14 +5032,41 @@ async function uploadToCloud(file) {
             if (isAIUser(ou) || isAIUser(oid)) return showToast('Искре можно отправлять только текст');
         }
         if (!activeChat) return; const btn = document.getElementById('btn-circle'); const previewContainer = document.getElementById('video-circle-preview-container'); const previewVideo = document.getElementById('video-circle-preview');
-        if (isRecordingVideo) { mediaRecorder.stop(); isRecordingVideo = false; btn.classList.remove('recording-pulse'); previewContainer.style.display = 'none'; if (previewVideo.srcObject) { previewVideo.srcObject.getTracks().forEach(t => t.stop()); } previewVideo.srcObject = null; } 
+        if (isRecordingVideo) { mediaRecorder.stop(); isRecordingVideo = false; clearChatActivity(); btn.classList.remove('recording-pulse'); previewContainer.style.display = 'none'; if (previewVideo.srcObject) { previewVideo.srcObject.getTracks().forEach(t => t.stop()); } previewVideo.srcObject = null; } 
         else {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }).then(stream => {
-                    isRecordingVideo = true; btn.classList.add('recording-pulse'); previewVideo.srcObject = stream; previewContainer.style.display = 'block';
+                    isRecordingVideo = true; setChatActivity('circle'); btn.classList.add('recording-pulse'); previewVideo.srcObject = stream; previewContainer.style.display = 'block';
                     let options = undefined; if (MediaRecorder.isTypeSupported('video/webm')) options = { mimeType: 'video/webm' }; else if (MediaRecorder.isTypeSupported('video/mp4')) options = { mimeType: 'video/mp4' };
                     mediaRecorder = new MediaRecorder(stream, options); recordedChunks = []; mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
-                    mediaRecorder.onstop = async () => { previewContainer.style.display = 'none'; previewVideo.srcObject = null; const finalMime = mediaRecorder.mimeType || 'video/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm'; const blob = new Blob(recordedChunks, { type: finalMime }); const file = new File([blob], 'video_circle.' + ext, { type: finalMime }); const url = await uploadToCloud(file); if(url) { const chatIndex = ensureChatInDb(); if (chatIndex > -1) { const msgObj = { uid: me.id, type: 'video_circle', url: url, time: Date.now(), reactions: {} }; if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); } if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = []; db.chats[chatIndex].msgs.push(msgObj); rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs); renderMsgs(); } } stream.getTracks().forEach(t => t.stop()); }; mediaRecorder.start();
+                    mediaRecorder.onstop = async () => {
+                        previewContainer.style.display = 'none'; previewVideo.srcObject = null;
+                        const finalMime = mediaRecorder.mimeType || 'video/mp4'; const ext = finalMime.includes('mp4') ? 'mp4' : 'webm';
+                        const blob = new Blob(recordedChunks, { type: finalMime });
+                        const file = new File([blob], 'video_circle.' + ext, { type: finalMime });
+                        const chatIndex = ensureChatInDb();
+                        if (chatIndex < 0) { stream.getTracks().forEach(t => t.stop()); return; }
+                        const localUrl = URL.createObjectURL(blob);
+                        const msgObj = { uid: me.id, type: 'video_circle', url: localUrl, time: Date.now(), reactions: {}, pending: true, status: 'sending' };
+                        if (replyingTo) { msgObj.reply = getSafeReplyObj(replyingTo); cancelReply(); }
+                        if (!db.chats[chatIndex].msgs) db.chats[chatIndex].msgs = [];
+                        db.chats[chatIndex].msgs.push(msgObj);
+                        const localIdx = db.chats[chatIndex].msgs.length - 1;
+                        renderMsgs();
+                        const url = await uploadToCloud(file);
+                        try { URL.revokeObjectURL(localUrl); } catch(_){}
+                        if (url && db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
+                            db.chats[chatIndex].msgs[localIdx].url = url;
+                            delete db.chats[chatIndex].msgs[localIdx].pending;
+                            delete db.chats[chatIndex].msgs[localIdx].status;
+                            rtdb.ref(`/dg_app_data/chats/${chatIndex}/msgs`).set(db.chats[chatIndex].msgs);
+                            renderMsgs();
+                        } else if (db.chats[chatIndex] && db.chats[chatIndex].msgs[localIdx]) {
+                            db.chats[chatIndex].msgs.splice(localIdx, 1);
+                            renderMsgs();
+                        }
+                        stream.getTracks().forEach(t => t.stop());
+                    }; mediaRecorder.start();
                 }).catch((e) => showToast("Нет доступа к камере: " + e.message));
             } else { showToast("Браузер не поддерживает запись видео"); }
         }
@@ -4887,7 +5081,26 @@ async function uploadToCloud(file) {
         return container;
     }
     
+    function stopAnyRecording() {
+        try {
+            if (typeof mediaRecorder !== 'undefined' && mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.ondataavailable = null; mediaRecorder.onstop = null;
+                try { mediaRecorder.stop(); } catch (_) {}
+                try { mediaRecorder.stream.getTracks().forEach(t => t.stop()); } catch (_) {}
+            }
+            isRecordingVoice = false; isRecordingVideo = false;
+            try { setVoiceRecUI(false); } catch (_) {}
+            try { if (typeof stopInputVoiceWave === 'function') stopInputVoiceWave(); } catch (_) {}
+            const pc = document.getElementById('video-circle-preview-container'); if (pc) pc.style.display = 'none';
+            const pv = document.getElementById('video-circle-preview');
+            if (pv) { if (pv.srcObject) { try { pv.srcObject.getTracks().forEach(t => t.stop()); } catch (_) {} } pv.srcObject = null; }
+            const cb = document.getElementById('btn-circle'); if (cb) cb.classList.remove('recording-pulse');
+            clearChatActivity();
+        } catch (e) {}
+    }
     function closeChat() {
+        stopAnyRecording();
+        document.querySelectorAll('video').forEach(v => { if (!v.closest('#story-viewer, #call-screen, #callScreen')) { try { v.pause(); } catch (_) {} } });
         document.getElementById('chat-window').classList.remove('active');
         activeChat = null;
         document.getElementById('chat-search-bar').style.display = 'none';
@@ -4993,7 +5206,7 @@ async function uploadToCloud(file) {
         const before = db.users.length;
         db.users = db.users.filter(isValidUser);
         if (db.users.length !== before) {
-            rtdb.ref('/dg_app_data/users').set(db.users);
+            safeSaveUsers(true);
         }
         const usersList = db.users.filter(u => isValidUser(u));
         // себя тоже показываем (чтобы поставить галочку себе)
@@ -5025,8 +5238,8 @@ async function uploadToCloud(file) {
         }).join('');
     }
     
-    function toggleBan(userId) { const user = db.users.find(u => u.id === userId); if (user) { user.isBanned = user.isBanned ? false : true; rtdb.ref('/dg_app_data/users').set(db.users); renderAdminPanel(); } }
-    window.toggleGlobalAdmin = function(userId) { const user = db.users.find(u => u.id === userId); if (user) { user.isGlobalAdmin = !user.isGlobalAdmin; rtdb.ref('/dg_app_data/users').set(db.users); renderAdminPanel(); } }
+    function toggleBan(userId) { const user = db.users.find(u => u.id === userId); if (user) { user.isBanned = user.isBanned ? false : true; safeSaveUsers(); renderAdminPanel(); } }
+    window.toggleGlobalAdmin = function(userId) { const user = db.users.find(u => u.id === userId); if (user) { user.isGlobalAdmin = !user.isGlobalAdmin; safeSaveUsers(); renderAdminPanel(); } }
     function deleteUser(userId) {
         if (!confirm('Удалить юзера навсегда?')) return;
         db.users = db.users.filter(u => u.id !== userId && isValidUser(u));
@@ -5044,6 +5257,7 @@ async function uploadToCloud(file) {
             if (c.admin === userId) c.admin = (c.members && c.members[0]) || null;
         });
         db.stories = (db.stories || []).filter(s => s.uid !== userId);
+        if (!usersLoadedOk) return showToast('Данные ещё не загружены, попробуйте позже');
         rtdb.ref('/dg_app_data').set({ users: db.users, chats: db.chats, stories: db.stories, callLogs: db.callLogs || [] });
         savedAccounts = savedAccounts.filter(a => a.id !== userId);
         localStorage.setItem('Nexagram_Accounts', JSON.stringify(savedAccounts));
@@ -5283,12 +5497,55 @@ async function uploadToCloud(file) {
     }
 
     // === Удаление своего аккаунта ===
-    function deleteMyAccount() {
+    async function deleteFirebaseAuthAccount() {
+        // Удаляет запись пользователя из Firebase Authentication. true — удалено или удалять нечего.
+        const authApi = firebase.auth();
+        let cu = authApi.currentUser;
+        const needsAuth = !!(me && (me.email || me.firebaseUid));
+        if (!cu && !needsAuth) return true;
+        try {
+            if (!cu && me.email) {
+                const pw = prompt('Для удаления аккаунта из Firebase введите ваш пароль:');
+                if (!pw) return false;
+                const cred = await authApi.signInWithEmailAndPassword(me.email, pw);
+                cu = cred.user;
+            }
+            if (!cu) return true;
+            try { await cu.delete(); return true; }
+            catch (e) {
+                if (e.code !== 'auth/requires-recent-login') throw e;
+                const providers = (cu.providerData || []).map(p => p.providerId);
+                if (providers.includes('password') && cu.email) {
+                    const pw = prompt('Для подтверждения введите ваш пароль:');
+                    if (!pw) return false;
+                    await cu.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(cu.email, pw));
+                } else if (providers.includes('google.com')) {
+                    await cu.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());
+                } else if (providers.includes('github.com')) {
+                    await cu.reauthenticateWithPopup(new firebase.auth.GithubAuthProvider());
+                } else { throw e; }
+                await cu.delete();
+                return true;
+            }
+        } catch (err) {
+            console.warn('deleteFirebaseAuthAccount', err);
+            if (err.code === 'auth/user-not-found') return true;
+            showToast('Firebase: ' + (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential' ? 'неверный пароль' : (err.message || 'ошибка')));
+            return false;
+        }
+    }
+
+    async function deleteMyAccount() {
         if (!me) return;
+        if (!usersLoadedOk) return showToast('Данные ещё не загружены, попробуйте позже');
         if (!confirm('Вы уверены, что хотите навсегда удалить свой аккаунт? Это действие нельзя отменить.')) return;
         if (!confirm('Последнее предупреждение: все ваши данные, сообщения и чаты будут удалены. Продолжить?')) return;
 
         const myId = me.id;
+        const authOk = await deleteFirebaseAuthAccount();
+        if (!authOk) {
+            if (!confirm('Не удалось удалить вход из Firebase. Удалить только данные приложения? (почту потом нельзя будет зарегистрировать заново, пока запись не удалена в Firebase)')) return;
+        }
 
         // Отключаем presence
         try {
@@ -5321,9 +5578,10 @@ async function uploadToCloud(file) {
         db.stories = (db.stories || []).filter(s => s.uid !== myId);
         db.callLogs = (db.callLogs || []).filter(c => c.caller !== myId && c.callee !== myId);
 
+        if (!usersLoadedOk) return showToast('Данные ещё не загружены, попробуйте позже');
         try {
             rtdb.ref('/dg_app_data').update({ users: db.users, chats: db.chats, stories: db.stories, callLogs: db.callLogs });
-        } catch (e) { console.warn(e); try { rtdb.ref('/dg_app_data/users').set(db.users); } catch(_){} }
+        } catch (e) { console.warn(e); try { safeSaveUsers(true); } catch(_){} }
 
         localStorage.removeItem('Nexagram_Session_UID');
         localStorage.removeItem('Nexagram_Drafts');
@@ -5353,7 +5611,7 @@ async function uploadToCloud(file) {
             const otherId = activeChat.u1 === me.id ? activeChat.u2 : activeChat.u1; 
             const contact = db.users.find(u => u.id === otherId);
             const isFriend = me.friends.includes(contact.id);
-            const starHtml = isSuperAdmin(contact) ? ' <span style="color: #007aff; font-size: 18px;">★</span>' : '';
+            const starHtml = ''; // ★ убраны, корона только в админ-панели
             const vBadge = verifiedBadgeHtml(contact);
             const isContactAI = isAIUser(contact);
             
@@ -5381,7 +5639,7 @@ async function uploadToCloud(file) {
                 <div class="mp-av-wrap" onclick="openAvatarModalView('${contact.avatarType}', '${contact.avatarValue}')" style="cursor: pointer;">
                     ${getAvatarHtml(contact.avatarType, contact.avatarValue)}
                 </div>
-                <div class="mp-name">${escapeHtml(contact.name)}${vBadge}${starHtml}</div>
+                <div class="mp-name">${escapeHtml(contact.name)}${vBadge}</div>
                 <div class="mp-status">${getUserStatus(contact)}</div>
                 
                 <div class="mp-actions">
@@ -5413,6 +5671,7 @@ async function uploadToCloud(file) {
             
             let adminButtons = ''; 
             if (isAdmin) { 
+                adminButtons += `<div class="mp-action-row" onclick="addMemberToCurrentChat()"><span class="material-symbols-outlined">person_add</span> Добавить участника</div>`;
                 adminButtons += `<div class="mp-action-row" onclick="uploadChatAvatar()"><span class="material-symbols-outlined">photo_camera</span> Изменить фото</div>`;
                 adminButtons += `<div class="mp-action-row" onclick="editChatName()"><span class="material-symbols-outlined">edit</span> Изменить название</div><div class="mp-action-row" onclick="editChatDesc()"><span class="material-symbols-outlined">description</span> Изменить описание</div>`; 
             } 
@@ -5543,7 +5802,7 @@ async function uploadToCloud(file) {
     }
     function toggleLightMode() { localSettings.lightMode = !localSettings.lightMode; localStorage.setItem('Nexagram_Settings', JSON.stringify(localSettings)); if (localSettings.lightMode) { document.documentElement.setAttribute('data-theme', 'light'); document.getElementById('themeIcon').textContent = 'dark_mode'; } else { document.documentElement.removeAttribute('data-theme'); document.getElementById('themeIcon').textContent = 'light_mode'; } }
     
-    function updUI() { if (!me) return; document.getElementById('p-name').textContent = me.name; document.getElementById('p-log').textContent = '@' + me.login; document.getElementById('p-bio').textContent = me.bio ? me.bio : 'Расскажите о себе...'; renderAvatar(document.getElementById('p-av'), me.avatarType, me.avatarValue); if (isSuperAdmin(me)) { document.getElementById('admin-switch-btn').style.display = 'flex'; document.getElementById('admin-panel-btn').style.display = 'flex'; } else { document.getElementById('admin-switch-btn').style.display = 'none'; document.getElementById('admin-panel-btn').style.display = 'none'; } }
+    function updUI() { if (!me) return; document.getElementById('p-name').innerHTML = escapeHtml(me.name) + verifiedBadgeHtml(me); document.getElementById('p-log').textContent = '@' + me.login; document.getElementById('p-bio').textContent = me.bio ? me.bio : 'Расскажите о себе...'; renderAvatar(document.getElementById('p-av'), me.avatarType, me.avatarValue); if (isSuperAdmin(me)) { document.getElementById('admin-switch-btn').style.display = 'flex'; document.getElementById('admin-panel-btn').style.display = 'flex'; } else { document.getElementById('admin-switch-btn').style.display = 'none'; document.getElementById('admin-panel-btn').style.display = 'none'; } }
     function setTab(tab) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(tab + '-screen').classList.add('active'); document.getElementById('nb-' + tab).classList.add('active'); if (tab === 'friends') renderFriends(); if (tab === 'chats') renderChats(); if (tab === 'calls') renderCalls(); }
     
     window.addSpecificContact = function(userId) { if (!me) return; const friend = db.users.find(u => u.id === userId); if (!friend) return showToast("Пользователь не найден"); if (me.friends.includes(userId)) return showToast("Уже в списке контактов"); if (friend.friendRequests && friend.friendRequests.includes(me.id)) return showToast("Заявка уже отправлена!"); if (me.friendRequests && me.friendRequests.includes(userId)) return acceptReq(userId); if (!friend.friendRequests) friend.friendRequests = []; friend.friendRequests.push(me.id); const uIdx = db.users.findIndex(u => u.id === userId); if(uIdx > -1) rtdb.ref(`/dg_app_data/users/${uIdx}/friendRequests`).set(friend.friendRequests); showToast("Заявка отправлена!"); closeModernProfile(); }
@@ -5558,14 +5817,14 @@ async function uploadToCloud(file) {
         if (me.friendRequests && me.friendRequests.length > 0) {
             reqContainer.innerHTML = '<div class="section-header" style="color:var(--p);">Заявки в друзья</div>' + me.friendRequests.map(id => {
                 const u = db.users.find(x => x.id === id); if(!u) return '';
-                return `<div class="list-item" style="cursor:default;"><div class="av-sm" onclick="startChat('${u.id}')" style="cursor:pointer;">${getAvatarHtml(u.avatarType, u.avatarValue)}</div><div class="list-info" onclick="startChat('${u.id}')" style="cursor:pointer;"><div class="list-name">${escapeHtml(u.name)}</div><div class="list-preview">Хочет добавить вас</div></div><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px;" onclick="acceptReq('${u.id}')">Принять</button><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px; background:var(--red); margin-left:6px;" onclick="rejectReq('${u.id}')"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button></div>`;
+                return `<div class="list-item" style="cursor:default;"><div class="av-sm" onclick="startChat('${u.id}')" style="cursor:pointer;">${getAvatarHtml(u.avatarType, u.avatarValue)}</div><div class="list-info" onclick="startChat('${u.id}')" style="cursor:pointer;"><div class="list-name">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}</div><div class="list-preview">Хочет добавить вас</div></div><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px;" onclick="acceptReq('${u.id}')">Принять</button><button class="auth-btn" style="padding:6px 12px; margin:0; width:auto; font-size:13px; background:var(--red); margin-left:6px;" onclick="rejectReq('${u.id}')"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button></div>`;
             }).join('');
         } else { reqContainer.innerHTML = ''; }
 
         const filter = document.getElementById('search-friends')?.value || ''; const container = document.getElementById('f-list'); 
         const friendUsers = me.friends.map(id => db.users.find(u => u && u.id === id)).filter(u => u && u.name.toLowerCase().includes(filter.toLowerCase())); 
         if (friendUsers.length === 0) { container.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined" style="font-size: 48px;">group</span>Список контактов пуст</div>'; return; } 
-        container.innerHTML = friendUsers.map(u => ` <div class="list-item" onclick="startChat('${u.id}')"> <div class="av-sm">${getAvatarHtml(u.avatarType, u.avatarValue)}</div> <div class="list-info"> <div class="list-name">${escapeHtml(u.name)}</div> <div class="list-preview">${getUserStatus(u)}</div> </div> </div> `).join(''); 
+        container.innerHTML = friendUsers.map(u => ` <div class="list-item" onclick="startChat('${u.id}')"> <div class="av-sm">${getAvatarHtml(u.avatarType, u.avatarValue)}</div> <div class="list-info"> <div class="list-name">${escapeHtml(u.name)}${verifiedBadgeHtml(u)}</div> <div class="list-preview">${getUserStatus(u)}</div> </div> </div> `).join(''); 
     }
 
     async function linkEmail() {
@@ -5618,7 +5877,7 @@ async function uploadToCloud(file) {
                 db.users[uIdx].firebaseUid = me.firebaseUid;
                 db.users[uIdx].emailOk = false;
                 try {
-                    await rtdb.ref('/dg_app_data/users').set(db.users);
+                    await safeSaveUsers();
                 } catch (we) {
                     console.warn(we);
                     try { await rtdb.ref('/dg_app_data/users/' + uIdx).update({ email: emailLower, firebaseUid: me.firebaseUid, emailOk: false }); }
@@ -5679,7 +5938,7 @@ async function uploadToCloud(file) {
     
     function showForgotPassword() { document.getElementById('forgotModal').classList.add('active'); document.getElementById('forgotLogin').value = ''; document.getElementById('forgotSecret').value = ''; }
     function closeForgotModal() { document.getElementById('forgotModal').classList.remove('active'); }
-    function resetPasswordWithSecret() { const login = document.getElementById('forgotLogin').value.trim().toLowerCase(); const secret = document.getElementById('forgotSecret').value.trim(); if (!login || !secret) return showToast('Заполните все поля'); const user = db.users.find(u => u.login === login); if (!user) return showToast('Юзер не найден'); if (user.secretWord !== hashString(secret)) return showToast('Неверное слово'); const newPass = prompt('Новый пароль (от 4 симв):'); if (!newPass || newPass.length < 4) return showToast('Слишком короткий'); user.password = hashString(newPass); rtdb.ref('/dg_app_data/users').set(db.users); showToast('Сброшен!'); closeForgotModal(); }
+    function resetPasswordWithSecret() { const login = document.getElementById('forgotLogin').value.trim().toLowerCase(); const secret = document.getElementById('forgotSecret').value.trim(); if (!login || !secret) return showToast('Заполните все поля'); const user = db.users.find(u => u.login === login); if (!user) return showToast('Юзер не найден'); if (user.secretWord !== hashString(secret)) return showToast('Неверное слово'); const newPass = prompt('Новый пароль (от 4 симв):'); if (!newPass || newPass.length < 4) return showToast('Слишком короткий'); user.password = hashString(newPass); safeSaveUsers(); showToast('Сброшен!'); closeForgotModal(); }
     function changeSecretWord() { if (!me) return; const oldSecret = prompt('Текущее секретное слово:'); if (!oldSecret || me.secretWord !== hashString(oldSecret)) return showToast('Неверное слово'); const newSecret = prompt('Новое слово:'); if (!newSecret || newSecret.length < 3) return; me.secretWord = hashString(newSecret); const uIdx = db.users.findIndex(u => u.id === me.id); if (uIdx > -1) rtdb.ref(`/dg_app_data/users/${uIdx}/secretWord`).set(me.secretWord); showToast('Обновлено!'); }
     function changePassword() { if (!me) return; const oldPass = prompt('Старый пароль:'); if (!oldPass || me.password !== hashString(oldPass)) return showToast('Неверный старый'); const newPass = prompt('Новый пароль:'); if (!newPass || newPass.length < 4) return; if (prompt('Подтвердите:') !== newPass) return showToast('Не совпадают'); me.password = hashString(newPass); const uIdx = db.users.findIndex(u => u.id === me.id); if (uIdx > -1) rtdb.ref(`/dg_app_data/users/${uIdx}/password`).set(me.password); showToast('Изменен!'); }
 
@@ -6107,6 +6366,60 @@ async function callNvidiaNemotron(messages, options = {}) {
         console.error('NVIDIA Nemotron error:', e);
         if (typeof showToast === 'function') showToast('Ошибка NVIDIA: ' + (e.message || e));
         return null;
+    }
+}
+
+// ---- Искра читает все сообщения пачкой: ждёт паузу 1.5 с, отвечает один раз на всё ----
+const _aiState = {};
+function _aiTypingRef(chatId) { return rtdb.ref(`/dg_typing/${chatId}/ai_iskra`); }
+function scheduleAIReply(chatId, otherId) {
+    const st = _aiState[chatId] || (_aiState[chatId] = { timer: null, token: 0 });
+    st.token++;
+    clearTimeout(st.timer);
+    try { _aiTypingRef(chatId).set(true); } catch (e) {}
+    st.timer = setTimeout(() => runAIReply(chatId, otherId), 1500);
+}
+async function runAIReply(chatId, otherId) {
+    const st = _aiState[chatId]; if (!st) return;
+    const myToken = st.token;
+    const stop = () => { try { _aiTypingRef(chatId).remove(); } catch (e) {} };
+    try {
+        const chat = db.chats.find(c => c && c.id === chatId);
+        if (!chat) { stop(); return; }
+        const msgs = chat.msgs || [];
+        const isAIMsg = m => m.uid === 'ai_iskra' || m.uid === otherId;
+        let start = msgs.length;
+        while (start > 0 && !isAIMsg(msgs[start - 1])) start--;
+        const pending = msgs.slice(start).filter(m => m.txt);
+        if (!pending.length) { stop(); return; }
+        const hist = [];
+        msgs.slice(Math.max(0, start - 12), start).forEach(m => {
+            if (!m.txt) return;
+            const role = isAIMsg(m) ? 'assistant' : 'user';
+            if (hist.length && hist[hist.length - 1].role === role) hist[hist.length - 1].content += '\n' + m.txt;
+            else hist.push({ role: role, content: m.txt });
+        });
+        while (hist.length && hist[0].role !== 'user') hist.shift();
+        const systemPrompt = 'Ты — Искра, дружелюбный и умный ИИ-ассистент мессенджера Nexagram. Тебя создали на базе NVIDIA Nemotron 3 Ultra. Отвечай на русском языке, по делу, с лёгким характером. Можно использовать эмодзи. Не говори, что ты языковая модель OpenAI или ChatGPT.';
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            ...hist,
+            { role: 'user', content: pending.map(m => m.txt).join('\n') }
+        ];
+        const result = await callNvidiaNemotron(messages, { max_tokens: 1500, temperature: 0.75 });
+        if (st.token !== myToken) return; // пришли новые сообщения — ответим на все сразу
+        stop();
+        const replyText = result ? (result.content || result.full || '').trim() : '';
+        if (!replyText) return;
+        const idx = db.chats.findIndex(c => c && c.id === chatId);
+        if (idx < 0) return;
+        if (!db.chats[idx].msgs) db.chats[idx].msgs = [];
+        db.chats[idx].msgs.push({ uid: 'ai_iskra', txt: replyText, time: Date.now(), reactions: {} });
+        rtdb.ref(`/dg_app_data/chats/${idx}/msgs`).set(db.chats[idx].msgs);
+        if (activeChat && activeChat.id === chatId) { renderMsgs(); markChatAsReadLocally(); }
+    } catch (err) {
+        console.error('AI reply error', err);
+        if (st.token === myToken) { stop(); showToast('Искра временно недоступна'); }
     }
 }
 
